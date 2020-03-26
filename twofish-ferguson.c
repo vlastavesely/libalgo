@@ -145,7 +145,7 @@
  * If people only had a little bit more common sense, and didn't come
  * whining like little children every time something happens....
  */
- 
+
 /*
  * Version history:
  * Version 0.0, 2002-08-30
@@ -171,21 +171,21 @@
  * Standard include files will probably be ok.
  */
 #include <string.h>     /* for memset(), memcpy(), and memcmp() */
-#include "twofish.h"
+#include "twofish-ferguson.h"
 
 
 /*
  * PLATFORM FIXES
  * ==============
  *
- * Fix the type definitions in twofish.h first!
- * 
  * The following definitions have to be fixed for each particular platform 
  * you work on. If you have a multi-platform program, you no doubt have 
  * portable definitions that you can substitute here without changing the 
  * rest of the code.
  */
 
+typedef unsigned char   Twofish_Byte;
+typedef unsigned int    Twofish_UInt32;
 
 /* 
  * Function called if something is fatally wrong with the implementation. 
@@ -466,438 +466,6 @@ typedef Twofish_UInt32  UInt32;
 
 #endif
 
-
-/*
- * Test the platform-specific macros.
- * This function tests the macros defined so far to make sure the 
- * definitions are appropriate for this platform.
- * If you make any mistake in the platform configuration, this should detect
- * that and inform you what went wrong.
- * Somewhere, someday, this is going to save somebody a lot of time,
- * because misbehaving macros are hard to debug.
- */
-static void test_platform()
-    {
-    /* Buffer with test values. */
-    Byte buf[] = {0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0};
-    UInt32 C;
-    UInt32 x,y;
-    int i;
-
-    /* 
-     * Some sanity checks on the types that can't be done in compile time. 
-     * A smart compiler will just optimise these tests away.
-     * The pre-processor doesn't understand different types, so we cannot
-     * do these checks in compile-time.
-     *
-     * I hate C.
-     *
-     * The first check in each case is to make sure the size is correct.
-     * The second check is to ensure that it is an unsigned type.
-     */
-    if( ((UInt32) ((UInt32)1 << 31) == 0) || ((UInt32)-1 < 0) ) 
-        {
-        Twofish_fatal( "Twofish code: Twofish_UInt32 type not suitable" );
-        }
-    if( (sizeof( Byte ) != 1) || ((Byte)-1 < 0) ) 
-        {
-        Twofish_fatal( "Twofish code: Twofish_Byte type not suitable" );
-        }
-
-    /* 
-     * Sanity-check the endianness conversions. 
-     * This is just an aid to find problems. If you do the endianness
-     * conversion macros wrong you will fail the full cipher test,
-     * but that does not help you find the error.
-     * Always make it easy to find the bugs! 
-     *
-     * Detail: There is no fully portable way of writing UInt32 constants,
-     * as you don't know whether to use the U or UL suffix. Using only U you
-     * might only be allowed 16-bit constants. Using UL you might get 64-bit
-     * constants which cannot be stored in a UInt32 without warnings, and
-     * which generally behave subtly different from a true UInt32.
-     * As long as we're just comparing with the constant, 
-     * we can always use the UL suffix and at worst lose some efficiency. 
-     * I use a separate '32-bit constant' macro in most of my other code.
-     *
-     * I hate C.
-     *
-     * Start with testing GET32. We test it on all positions modulo 4 
-     * to make sure we can handly any position of inputs. (Some CPUs
-     * do not allow non-aligned accesses which we would do if you used
-     * the CONVERT_USING_CASTS option.
-     */
-    if( GET32( buf ) != 0x78563412UL || GET32(buf+1) != 0x9a785634UL 
-        || GET32( buf+2 ) != 0xbc9a7856UL || GET32(buf+3) != 0xdebc9a78UL )
-        {
-        Twofish_fatal( "Twofish code: GET32 not implemented properly" );
-        }
-
-    /* 
-     * We can now use GET32 to test PUT32.
-     * We don't test the shifted versions. If GET32 can do that then
-     * so should PUT32.
-     */
-    C = GET32( buf );
-    PUT32( 3*C, buf );
-    if( GET32( buf ) != 0x69029c36UL )
-        {
-        Twofish_fatal( "Twofish code: PUT32 not implemented properly" );
-        }
-
-
-    /* Test ROL and ROR */
-    for( i=1; i<32; i++ ) 
-        {
-        /* Just a simple test. */
-        x = ROR32( C, i );
-        y = ROL32( C, i );
-        x ^= (C>>i) ^ (C<<(32-i));
-        y ^= (C<<i) ^ (C>>(32-i));
-        x |= y;
-        /* 
-         * Now all we check is that x is zero in the least significant
-         * 32 bits. Using the UL suffix is safe here, as it doesn't matter
-         * if we get a larger type.
-         */
-        if( (x & 0xffffffffUL) != 0 )
-            {
-            Twofish_fatal( "Twofish ROL or ROR not properly defined." );
-            }
-        }
-
-    /* Test the BSWAP macro */
-    if( (BSWAP(C)) != 0x12345678UL )
-        {
-        /*
-         * The BSWAP macro should always work, even if you are not using it.
-         * A smart optimising compiler will just remove this entire test.
-         */
-        Twofish_fatal( "BSWAP not properly defined." );
-        }
-
-    /* And we can test the b<i> macros which use SELECT_BYTE. */
-    if( (b0(C)!=0x12) || (b1(C) != 0x34) || (b2(C) != 0x56) || (b3(C) != 0x78) )
-        {
-        /*
-         * There are many reasons why this could fail.
-         * Most likely is that CPU_IS_BIG_ENDIAN has the wrong value. 
-         */
-        Twofish_fatal( "Twofish code: SELECT_BYTE not implemented properly" );
-        }
-    }
-
-
-/*
- * Finally, we can start on the Twofish-related code.
- * You really need the Twofish specifications to understand this code. The
- * best source is the Twofish book:
- *     "The Twofish Encryption Algorithm", by Bruce Schneier, John Kelsey,
- *     Doug Whiting, David Wagner, Chris Hall, and Niels Ferguson.
- * you can also use the AES submission document of Twofish, which is 
- * available from my list of publications on my personal web site at 
- *    http://niels.ferguson.net/.
- *
- * The first thing we do is write the testing routines. This is what the 
- * implementation has to satisfy in the end. We only test the external
- * behaviour of the implementation of course.
- */
-
-
-/*
- * Perform a single self test on a (plaintext,ciphertext,key) triple.
- * Arguments:
- *  key     array of key bytes
- *  key_len length of key in bytes
- *  p       plaintext
- *  c       ciphertext
- */
-static void test_vector( Byte key[], int key_len, Byte p[16], Byte c[16] )
-    {
-    Byte tmp[16];               /* scratch pad. */
-    Twofish_key xkey;           /* The expanded key */
-    int i;
-
-
-    /* Prepare the key */
-    Twofish_prepare_key( key, key_len, &xkey );
-
-    /* 
-     * We run the test twice to ensure that the xkey structure
-     * is not damaged by the first encryption. 
-     * Those are hideous bugs to find if you get them in an application.
-     */
-    for( i=0; i<2; i++ ) 
-        {
-        /* Encrypt and test */
-        Twofish_encrypt( &xkey, p, tmp );
-        if( memcmp( c, tmp, 16 ) != 0 ) 
-            {
-            Twofish_fatal( "Twofish encryption failure" );
-            }
-
-        /* Decrypt and test */
-        Twofish_decrypt( &xkey, c, tmp );
-        if( memcmp( p, tmp, 16 ) != 0 ) 
-            {
-            Twofish_fatal( "Twofish decryption failure" );
-            }
-        }
-
-    /* The test keys are not secret, so we don't need to wipe xkey. */
-    }
-
-
-/*
- * Check implementation using three (key,plaintext,ciphertext)
- * test vectors, one for each major key length.
- * 
- * This is an absolutely minimal self-test. 
- * This routine does not test odd-sized keys.
- */
-static void test_vectors()
-    {
-    /*
-     * We run three tests, one for each major key length.
-     * These test vectors come from the Twofish specification.
-     * One encryption and one decryption using randomish data and key
-     * will detect almost any error, especially since we generate the
-     * tables ourselves, so we don't have the problem of a single
-     * damaged table entry in the source.
-     */
-
-    /* 128-bit test is the I=3 case of section B.2 of the Twofish book. */
-    static Byte k128[] = {
-        0x9F, 0x58, 0x9F, 0x5C, 0xF6, 0x12, 0x2C, 0x32, 
-        0xB6, 0xBF, 0xEC, 0x2F, 0x2A, 0xE8, 0xC3, 0x5A,
-        };
-    static Byte p128[] = {
-        0xD4, 0x91, 0xDB, 0x16, 0xE7, 0xB1, 0xC3, 0x9E, 
-        0x86, 0xCB, 0x08, 0x6B, 0x78, 0x9F, 0x54, 0x19
-        };
-    static Byte c128[] = {
-        0x01, 0x9F, 0x98, 0x09, 0xDE, 0x17, 0x11, 0x85, 
-        0x8F, 0xAA, 0xC3, 0xA3, 0xBA, 0x20, 0xFB, 0xC3
-        };
-
-    /* 192-bit test is the I=4 case of section B.2 of the Twofish book. */
-    static Byte k192[] = {
-        0x88, 0xB2, 0xB2, 0x70, 0x6B, 0x10, 0x5E, 0x36, 
-        0xB4, 0x46, 0xBB, 0x6D, 0x73, 0x1A, 0x1E, 0x88, 
-        0xEF, 0xA7, 0x1F, 0x78, 0x89, 0x65, 0xBD, 0x44
-        };
-    static Byte p192[] = {
-        0x39, 0xDA, 0x69, 0xD6, 0xBA, 0x49, 0x97, 0xD5,
-        0x85, 0xB6, 0xDC, 0x07, 0x3C, 0xA3, 0x41, 0xB2
-        };
-    static Byte c192[] = {
-        0x18, 0x2B, 0x02, 0xD8, 0x14, 0x97, 0xEA, 0x45,
-        0xF9, 0xDA, 0xAC, 0xDC, 0x29, 0x19, 0x3A, 0x65
-        };
-
-    /* 256-bit test is the I=4 case of section B.2 of the Twofish book. */
-    static Byte k256[] = {
-        0xD4, 0x3B, 0xB7, 0x55, 0x6E, 0xA3, 0x2E, 0x46, 
-        0xF2, 0xA2, 0x82, 0xB7, 0xD4, 0x5B, 0x4E, 0x0D,
-        0x57, 0xFF, 0x73, 0x9D, 0x4D, 0xC9, 0x2C, 0x1B,
-        0xD7, 0xFC, 0x01, 0x70, 0x0C, 0xC8, 0x21, 0x6F
-        };
-    static Byte p256[] = {
-        0x90, 0xAF, 0xE9, 0x1B, 0xB2, 0x88, 0x54, 0x4F,
-        0x2C, 0x32, 0xDC, 0x23, 0x9B, 0x26, 0x35, 0xE6
-        };
-    static Byte c256[] = {
-        0x6C, 0xB4, 0x56, 0x1C, 0x40, 0xBF, 0x0A, 0x97,
-        0x05, 0x93, 0x1C, 0xB6, 0xD4, 0x08, 0xE7, 0xFA
-        };
-
-    /* Run the actual tests. */
-    test_vector( k128, 16, p128, c128 );
-    test_vector( k192, 24, p192, c192 );
-    test_vector( k256, 32, p256, c256 );
-    }   
-
-
-/*
- * Perform extensive test for a single key size.
- * 
- * Test a single key size against the test vectors from section
- * B.2 in the Twofish book. This is a sequence of 49 encryptions
- * and decryptions. Each plaintext is equal to the ciphertext of
- * the previous encryption. The key is made up from the ciphertext
- * two and three encryptions ago. Both plaintext and key start
- * at the zero value. 
- * We should have designed a cleaner recurrence relation for
- * these tests, but it is too late for that now. At least we learned
- * how to do it better next time.
- * For details see appendix B of the book.
- *
- * Arguments:
- * key_len      Number of bytes of key
- * final_value  Final plaintext value after 49 iterations
- */
-static void test_sequence( int key_len, Byte final_value[] )
-    {
-    Byte buf[ (50+3)*16 ];      /* Buffer to hold our computation values. */
-    Byte tmp[16];               /* Temp for testing the decryption. */
-    Twofish_key xkey;           /* The expanded key */
-    int i;                      
-    Byte * p;
-
-    /* Wipe the buffer */
-    memset( buf, 0, sizeof( buf ) );
-
-    /*
-     * Because the recurrence relation is done in an inconvenient manner
-     * we end up looping backwards over the buffer.
-     */
-
-    /* Pointer in buffer points to current plaintext. */
-    p = &buf[50*16];
-    for( i=1; i<50; i++ )
-        {
-        /* 
-         * Prepare a key.
-         * This automatically checks that key_len is valid.
-         */
-        Twofish_prepare_key( p+16, key_len, &xkey );
-
-        /* Compute the next 16 bytes in the buffer */
-        Twofish_encrypt( &xkey, p, p-16 );
-
-        /* Check that the decryption is correct. */
-        Twofish_decrypt( &xkey, p-16, tmp );
-        if( memcmp( tmp, p, 16 ) != 0 )
-            {
-            Twofish_fatal( "Twofish decryption failure in sequence" );
-            }
-        /* Move on to next 16 bytes in the buffer. */
-        p -= 16;
-        }
-
-    /* And check the final value. */
-    if( memcmp( p, final_value, 16 ) != 0 ) 
-        {
-        Twofish_fatal( "Twofish encryption failure in sequence" );
-        }
-
-    /* None of the data was secret, so there is no need to wipe anything. */
-    }
-
-
-/* 
- * Run all three sequence tests from the Twofish test vectors. 
- *
- * This checks the most extensive test vectors currently available 
- * for Twofish. The data is from the Twofish book, appendix B.2.
- */
-static void test_sequences()
-    {
-    static Byte r128[] = {
-        0x5D, 0x9D, 0x4E, 0xEF, 0xFA, 0x91, 0x51, 0x57,
-        0x55, 0x24, 0xF1, 0x15, 0x81, 0x5A, 0x12, 0xE0
-        };
-    static Byte r192[] = {
-        0xE7, 0x54, 0x49, 0x21, 0x2B, 0xEE, 0xF9, 0xF4,
-        0xA3, 0x90, 0xBD, 0x86, 0x0A, 0x64, 0x09, 0x41
-        };
-    static Byte r256[] = {
-        0x37, 0xFE, 0x26, 0xFF, 0x1C, 0xF6, 0x61, 0x75,
-        0xF5, 0xDD, 0xF4, 0xC3, 0x3B, 0x97, 0xA2, 0x05
-        };
-
-    /* Run the three sequence test vectors */
-    test_sequence( 16, r128 );
-    test_sequence( 24, r192 );
-    test_sequence( 32, r256 );
-    }
-
-
-/*
- * Test the odd-sized keys.
- *
- * Every odd-sized key is equivalent to a one of 128, 192, or 256 bits.
- * The equivalent key is found by padding at the end with zero bytes
- * until a regular key size is reached.
- *
- * We just test that the key expansion routine behaves properly.
- * If the expanded keys are identical, then the encryptions and decryptions
- * will behave the same.
- */
-static void test_odd_sized_keys()
-    {
-    Byte buf[32];
-    Twofish_key xkey;
-    Twofish_key xkey_two;
-    int i;
-
-    /* 
-     * We first create an all-zero key to use as PRNG key. 
-     * Normally we would not have to fill the buffer with zeroes, as we could
-     * just pass a zero key length to the Twofish_prepare_key function.
-     * However, this relies on using odd-sized keys, and those are just the
-     * ones we are testing here. We can't use an untested function to test 
-     * itself. 
-     */
-    memset( buf, 0, sizeof( buf ) );
-    Twofish_prepare_key( buf, 16, &xkey );
-
-    /* Fill buffer with pseudo-random data derived from two encryptions */
-    Twofish_encrypt( &xkey, buf, buf );
-    Twofish_encrypt( &xkey, buf, buf+16 );
-
-    /* Create all possible shorter keys that are prefixes of the buffer. */
-    for( i=31; i>=0; i-- )
-        {
-        /* Set a byte to zero. This is the new padding byte */
-        buf[i] = 0;
-
-        /* Expand the key with only i bytes of length */
-        Twofish_prepare_key( buf, i, &xkey );
-
-        /* Expand the corresponding padded key of regular length */
-        Twofish_prepare_key( buf, i<=16 ? 16 : i<= 24 ? 24 : 32, &xkey_two );
-
-        /* Compare the two */
-        if( memcmp( &xkey, &xkey_two, sizeof( xkey ) ) != 0 )
-            {
-            Twofish_fatal( "Odd sized keys do not expand properly" );
-            }
-        }
-
-    /* None of the key values are secret, so we don't need to wipe them. */
-    }
-
-
-/*
- * Test the Twofish implementation.
- *
- * This routine runs all the self tests, in order of importance.
- * It is called by the Twofish_initialise routine.
- * 
- * In almost all applications the cost of running the self tests during
- * initialisation is insignificant, especially
- * compared to the time it takes to load the application from disk. 
- * If you are very pressed for initialisation performance, 
- * you could remove some of the tests. Make sure you did run them
- * once in the software and hardware configuration you are using.
- */
-static void self_test()
-    {
-    /* The three test vectors form an absolute minimal test set. */
-    test_vectors();
-
-    /* 
-     * If at all possible you should run these tests too. They take
-     * more time, but provide a more thorough coverage.
-     */
-    test_sequences();
-
-    /* Test the odd-sized keys. */
-    test_odd_sized_keys();
-    }
-
-
 /*
  * And now, the actual Twofish implementation.
  *
@@ -1046,7 +614,7 @@ static void initialise_mds_tables()
     UInt32 q,qef,q5b;       /* Temporary variables. */
 
     /* Loop over all 8-bit input values */
-    for( i=0; i<256; i++ ) 
+    for( i=0; i<256; i++ )
         {
         /* 
          * To save some work during the key expansion we include the last
@@ -1156,7 +724,7 @@ static UInt32 h( int k, Byte L[], int kCycles )
         return H03(k,L) ^ H13(k,L) ^ H23(k,L) ^ H33(k,L);
     case 4:
         return H04(k,L) ^ H14(k,L) ^ H24(k,L) ^ H34(k,L);
-    default: 
+    default:
         /* This is always a coding error, which is fatal. */
         Twofish_fatal( "Twofish h(): Illegal argument" );
         }
@@ -1179,7 +747,7 @@ static UInt32 h( int k, Byte L[], int kCycles )
  * kCycles  number of key words, must be in the set {2,3,4}
  * xkey     pointer to Twofish_key structure that will contain the S-boxes.
  */
-static void fill_keyed_sboxes( Byte S[], int kCycles, Twofish_key * xkey )
+static void fill_keyed_sboxes( Byte S[], int kCycles, struct twofish_subkeys * xkey )
     {
     int i;
     switch( kCycles ) {
@@ -1211,7 +779,7 @@ static void fill_keyed_sboxes( Byte S[], int kCycles, Twofish_key * xkey )
             xkey->s[3][i]= H34( i, S );
             }
         break;
-    default: 
+    default:
         /* This is always a coding error, which is fatal. */
         Twofish_fatal( "Twofish fill_keyed_sboxes(): Illegal argument" );
         }
@@ -1230,23 +798,12 @@ static int Twofish_initialised = 0;
  */
 void Twofish_initialise()
     {
-    /* First test the various platform-specific definitions. */
-    test_platform();
-
     /* We can now generate our tables, in the right order of course. */
     initialise_q_boxes();
     initialise_mds_tables();
 
     /* We're finished with the initialisation itself. */
     Twofish_initialised = 1;
-
-    /* 
-     * And run some tests on the whole cipher. 
-     * Yes, you need to do this every time you start your program. 
-     * It is called assurance; you have to be certain that your program
-     * still works properly. 
-     */
-    self_test();
     }
 
 
@@ -1288,7 +845,9 @@ static unsigned int rs_poly_div_const[] = {0, 0xa6 };
  * xkey     Pointer to an Twofish_key structure that will be filled 
  *             with the internal form of the cipher key.
  */
-void Twofish_prepare_key( Byte key[], int key_len, Twofish_key * xkey )
+
+int twofish_prepare_key(struct twofish_subkeys *xkey,
+			const unsigned char *key, unsigned int bits)
     {
     /* We use a single array to store all key material in, 
      * to simplify the wiping of the key material at the end.
@@ -1296,7 +855,8 @@ void Twofish_prepare_key( Byte key[], int key_len, Twofish_key * xkey )
      * The next 32 bytes contain the S-vector in its weird format,
      * and we have 4 bytes of overrun necessary for the RS-reduction.
      */
-    Byte K[32+32+4]; 
+    Byte K[32+32+4];
+    int key_len = bits / 8;
 
     int kCycles;        /* # key cycles, 2,3, or 4. */
 
@@ -1312,41 +872,7 @@ void Twofish_prepare_key( Byte key[], int key_len, Twofish_key * xkey )
     /* Check that the Twofish implementation was initialised. */
     if( Twofish_initialised == 0 )
         {
-        /* 
-         * You didn't call Twofish_initialise before calling this routine.
-         * This is a programming error, and therefore we call the fatal
-         * routine. 
-         *
-         * I could of course call the initialisation routine here,
-         * but there are a few reasons why I don't. First of all, the 
-         * self-tests have to be done at startup. It is no good to inform
-         * the user that the cipher implementation fails when he wants to
-         * write his data to disk in encrypted form. You have to warn him
-         * before he spends time typing his data. Second, the initialisation
-         * and self test are much slower than a single key expansion.
-         * Calling the initialisation here makes the performance of the
-         * cipher unpredictable. This can lead to really weird problems 
-         * if you use the cipher for a real-time task. Suddenly it fails 
-         * once in a while the first time you try to use it. Things like 
-         * that are almost impossible to debug.
-         */
-        Twofish_fatal( "Twofish implementation was not initialised." );
-        
-        /*
-         * There is always a danger that the Twofish_fatal routine returns,
-         * in spite of the specifications that it should not. 
-         * (A good programming rule: don't trust the rest of the code.)
-         * This would be disasterous. If the q-tables and MDS-tables have
-         * not been initialised, they are probably still filled with zeroes.
-         * Suppose the MDS-tables are all zero. The key expansion would then
-         * generate all-zero round keys, and all-zero s-boxes. The danger
-         * is that nobody would notice as the encryption function still
-         * mangles the input, and the decryption still 'decrypts' it,
-         * but now in a completely key-independent manner. 
-         * To stop such security disasters, we use blunt force.
-         * If your program hangs here: fix the fatal routine!
-         */
-        for(;;);        /* Infinite loop, which beats being insecure. */
+        Twofish_initialise();
         }
 
     /* Check for valid key length. */
@@ -1366,7 +892,7 @@ void Twofish_prepare_key( Byte key[], int key_len, Twofish_key * xkey )
          * buffer overflows, when these problems were solved in 1960 with
          * the development of Algol? Have we not leared anything?
          */
-        return;
+        return -1;
         }
 
     /* Pad the key with zeroes to the next suitable key length. */
@@ -1463,7 +989,7 @@ void Twofish_prepare_key( Byte key[], int key_len, Twofish_key * xkey )
     sptr = K + 32;                  /* Start at start of S */
 
     /* Loop over all key material */
-    while( kptr > K ) 
+    while( kptr > K )
         {
         kptr -= 8;
         /* 
@@ -1511,7 +1037,7 @@ void Twofish_prepare_key( Byte key[], int key_len, Twofish_key * xkey )
             t[-2] ^= bx;
             t[-3] ^= bxx;
             t[-4] ^= b;
-            
+
             /* Go to the next coefficient. */
             t--;
             }
@@ -1528,8 +1054,28 @@ void Twofish_prepare_key( Byte key[], int key_len, Twofish_key * xkey )
 
     /* Wipe array that contained key material. */
     memset( K, 0, sizeof( K ) );
+
+    return 0;
     }
 
+
+void twofish_wipe(struct twofish_subkeys *subkeys)
+{
+	unsigned int i;
+
+	for (i = 0; i < 256; i++) {
+		subkeys->s[0][i] = 0;
+		subkeys->s[1][i] = 0;
+		subkeys->s[2][i] = 0;
+		subkeys->s[3][i] = 0;
+	}
+	for (i = 0; i < 40; i++) {
+		subkeys->K[i] = 0;
+		subkeys->s[1][i] = 0;
+		subkeys->s[2][i] = 0;
+		subkeys->s[3][i] = 0;
+	}
+}
 
 /*
  * We can now start on the actual encryption and decryption code.
@@ -1638,7 +1184,7 @@ void Twofish_prepare_key( Byte key[], int key_len, Twofish_key * xkey )
  * p            16 bytes of plaintext
  * c            16 bytes in which to store the ciphertext
  */
-void Twofish_encrypt( Twofish_key * xkey, Byte p[16], Byte c[16])
+void twofish_encrypt(struct twofish_subkeys * xkey, unsigned char *c, const unsigned char *p)
     {
     UInt32 A,B,C,D,T0,T1;       /* Working variables */
 
@@ -1661,7 +1207,7 @@ void Twofish_encrypt( Twofish_key * xkey, Byte p[16], Byte c[16])
  * p            16 bytes of plaintext
  * c            16 bytes in which to store the ciphertext
  */
-void Twofish_decrypt( Twofish_key * xkey, Byte c[16], Byte p[16])
+void twofish_decrypt(struct twofish_subkeys * xkey, unsigned char *p, const unsigned char *c)
     {
     UInt32 A,B,C,D,T0,T1;       /* Working variables */
 
