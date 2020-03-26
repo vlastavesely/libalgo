@@ -3,7 +3,8 @@ RM = rm -f
 CFLAGS = -Ofast -Wall
 LIBS =
 
-LIB     = libsec.so
+LIBNAME = algo
+LIB     = lib$(LIBNAME).so
 SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:%.c=%.o)
 CFLAGS  = -Wall -Ofast -fPIC
@@ -33,10 +34,10 @@ test: $(TEST_PROG)
 	LD_LIBRARY_PATH=$$(pwd) $(TEST_PROG)
 
 $(TEST_PROG): $(TEST_OBJECTS) $(LIB)
-	$(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -lsec
+	$(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -l$(LIBNAME)
 
 tests/%.o: tests/%.c
 	$(CC) -MMD -MP -c $< -o $@ $(TEST_CFLAGS) $(TEST_LIBS)
 
 clean:
-	$(RM) $(PROG) $(TEST_PROG) *.a *.o */*.o */*.d *.d
+	$(RM) $(TEST_PROG) *.so *.o */*.o */*.d *.d
