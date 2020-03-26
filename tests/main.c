@@ -1,5 +1,5 @@
 #include "test.h"
-#include "rijndael.h"
+#include "rijndael-alg-fst.h"
 #include "twofish-ferguson.h"
 
 static struct Suite *create_test_suite()
@@ -11,7 +11,7 @@ static struct Suite *create_test_suite()
 	test_case = tcase_create(NULL);
 	suite_add_tcase(suite, test_case);
 
-	register_rijndael_tests(test_case);
+	register_rijndael_alg_fst_tests(test_case);
 	register_twofish_ferguson_tests(test_case);
 
 	return suite;
