@@ -6,7 +6,7 @@ LIBS =
 LIB     = libsec.so
 SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:%.c=%.o)
-CFLAGS  = -Wall -Ofast
+CFLAGS  = -Wall -Ofast -fPIC
 LIBS    =
 
 TEST_PROG    = tests/test
@@ -30,10 +30,10 @@ $(LIB): $(OBJECTS)
 	$(CC) -MMD -MP -c $< -o $@ $(CFLAGS) $(LIBS)
 
 test: $(TEST_PROG)
-	$(TEST_PROG)
+	LD_LIBRARY_PATH=$$(pwd) $(TEST_PROG)
 
 $(TEST_PROG): $(TEST_OBJECTS) $(LIB)
-	$(CC) -MMD -MP $^ -o $@ $(TEST_CFLAGS) $(TEST_LIBS)
+	$(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -lsec
 
 tests/%.o: tests/%.c
 	$(CC) -MMD -MP -c $< -o $@ $(TEST_CFLAGS) $(TEST_LIBS)
