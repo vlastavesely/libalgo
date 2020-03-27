@@ -17,7 +17,7 @@ void twofish_encrypt(struct twofish_subkeys *subkeys, unsigned char *out,
 		     const unsigned char *in);
 void twofish_decrypt(struct twofish_subkeys *subkeys, unsigned char *out,
 		     const unsigned char *in);
-void twofish_wipe(struct twofish_subkeys *subkeys);
+void twofish_wipe_key(struct twofish_subkeys *subkeys);
 
 #if defined (__cplusplus)
 }

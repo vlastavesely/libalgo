@@ -1059,7 +1059,7 @@ int twofish_prepare_key(struct twofish_subkeys *xkey,
     }
 
 
-void twofish_wipe(struct twofish_subkeys *subkeys)
+void twofish_wipe_key(struct twofish_subkeys *subkeys)
 {
 	unsigned int i;
 

@@ -18,7 +18,7 @@ void rijndael_encrypt(struct rijndael_subkeys *subkeys, unsigned char *out,
 		      const unsigned char *in);
 void rijndael_decrypt(struct rijndael_subkeys *subkeys, unsigned char *out,
 		      const unsigned char *in);
-void rijndael_wipe(struct rijndael_subkeys *subkeys);
+void rijndael_wipe_key(struct rijndael_subkeys *subkeys);
 
 #if defined (__cplusplus)
 }

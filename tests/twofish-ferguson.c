@@ -74,7 +74,7 @@ static void test_twofish(const unsigned char *key, const unsigned char *pt,
 	twofish_decrypt(&subkeys, buf, buf);
 	compare_bufs(pt, buf, 16);
 
-	twofish_wipe(&subkeys);
+	twofish_wipe_key(&subkeys);
 }
 
 START_TEST(test_twofish_128)

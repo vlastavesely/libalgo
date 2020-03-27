@@ -869,7 +869,7 @@ int rijndael_prepare_key(struct rijndael_subkeys *subkeys,
 	return 0;
 }
 
-void rijndael_wipe(struct rijndael_subkeys *subkeys)
+void rijndael_wipe_key(struct rijndael_subkeys *subkeys)
 {
 	unsigned int i;
 

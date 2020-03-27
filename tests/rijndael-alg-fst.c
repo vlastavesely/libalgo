@@ -64,7 +64,7 @@ static void test_rijndael(const unsigned char *key, const unsigned char *ct,
 	rijndael_decrypt(&subkeys, buf, buf);
 	compare_bufs(plaintext, buf, 16);
 
-	rijndael_wipe(&subkeys);
+	rijndael_wipe_key(&subkeys);
 }
 
 START_TEST(test_rijndael_128)
