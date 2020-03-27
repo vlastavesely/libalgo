@@ -1,6 +1,7 @@
 #include "test.h"
 #include "rijndael-alg-fst.h"
 #include "twofish-ferguson.h"
+#include "serpent.h"
 
 static struct Suite *create_test_suite()
 {
@@ -13,6 +14,7 @@ static struct Suite *create_test_suite()
 
 	register_rijndael_alg_fst_tests(test_case);
 	register_twofish_ferguson_tests(test_case);
+	register_serpent_tests(test_case);
 
 	return suite;
 }

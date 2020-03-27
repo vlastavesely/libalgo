@@ -1,2 +1,3 @@
 rijndael-alg-fst.c linguist-vendored
 twofish-ferguson.c linguist-vendored
+serpent.c linguist-vendored
