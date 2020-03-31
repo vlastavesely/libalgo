@@ -36,7 +36,7 @@ static void dump_hex(char *out, const unsigned char *in, unsigned int n)
 void sha256_test(const char *str, const char *expected)
 {
 	struct sha256_state state;
-	unsigned char buf[20];
+	unsigned char buf[32];
 	char hex[65];
 
 	sha256_init(&state);
@@ -66,7 +66,7 @@ END_TEST
 START_TEST(test_sha256_64chars)
 {
 	struct sha256_state state;
-	unsigned char buf[20];
+	unsigned char buf[32];
 	char hex[65];
 
 	sha256_test(SIXTEEN SIXTEEN SIXTEEN SIXTEEN, digest_64chars);
