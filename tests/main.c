@@ -5,6 +5,7 @@
 #include "whirlpool.h"
 #include "sha256.h"
 #include "sha512.h"
+#include "utils.h"
 
 static struct Suite *create_test_suite()
 {
@@ -21,6 +22,7 @@ static struct Suite *create_test_suite()
 	register_whirlpool_tests(test_case);
 	register_sha256_tests(test_case);
 	register_sha512_tests(test_case);
+	register_utils_tests(test_case);
 
 	return suite;
 }

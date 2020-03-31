@@ -1,5 +1,5 @@
 #include "sha512.h"
-#include "macros.h"
+#include "utils.h"
 #include <string.h> /* memcpy */
 
 static const unsigned long k[80] = {

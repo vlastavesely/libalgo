@@ -42,14 +42,6 @@ static const unsigned char c256[] = {
 	0x2b, 0xe3, 0x8e, 0xbd, 0x82, 0x56, 0x16, 0xc0
 };
 
-static void compare_bufs(const unsigned char *a, const unsigned char *b,
-			 unsigned int n)
-{
-	unsigned int i;
-	for (i = 0; i < n; i++)
-		ck_assert_int_eq(a[i], b[i]);
-}
-
 static void test_serpent(const unsigned char *key, const unsigned char *pt,
 			 const unsigned char *ct, unsigned int bits)
 {
@@ -58,10 +50,10 @@ static void test_serpent(const unsigned char *key, const unsigned char *pt,
 
 	serpent_prepare_key(&subkeys, key, bits);
 	serpent_encrypt(&subkeys, buf, pt);
-	compare_bufs(ct, buf, 16);
+	ck_assert_byte_array_eq(ct, buf, 16);
 
 	serpent_decrypt(&subkeys, buf, buf);
-	compare_bufs(pt, buf, 16);
+	ck_assert_byte_array_eq(pt, buf, 16);
 
 	serpent_wipe_key(&subkeys);
 }

@@ -29,24 +29,15 @@ static const unsigned char digest_abc[] = {
 	0xd2, 0x25, 0x29, 0x20, 0x76, 0xd4, 0xee, 0xf5
 };
 
-static void compare_bufs(const unsigned char *a, const unsigned char *b,
-			 unsigned int n)
-{
-	unsigned int i;
-
-	for (i = 0; i < n; i++)
-		ck_assert_int_eq(a[i], b[i]);
-}
-
 void whirlpool_test(const char *str, const unsigned char *expected)
 {
 	struct whirlpool_state state;
-	unsigned char buf[20];
+	unsigned char buf[64];
 
 	whirlpool_init(&state);
 	whirlpool_update(&state, (const unsigned char *) str, strlen(str));
 	whirlpool_final(&state, buf);
-	compare_bufs(expected, buf, 20);
+	ck_assert_byte_array_eq(expected, buf, 64);
 	whirlpool_wipe_state(&state);
 }
 

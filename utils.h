@@ -1,0 +1,43 @@
+#ifndef __UTILS_H
+#define __UTILS_H
+
+#define GETU32_BE(a) ( \
+	((unsigned int) (a)[0] << 24) | \
+	((unsigned int) (a)[1] << 16) | \
+	((unsigned int) (a)[2] <<  8) | \
+	((unsigned int) (a)[3])         \
+)
+
+#define PUTU32_BE(a, i) {			\
+	(a)[0] = (unsigned char) ((i) >> 24);	\
+	(a)[1] = (unsigned char) ((i) >> 16);	\
+	(a)[2] = (unsigned char) ((i) >>  8);	\
+	(a)[3] = (unsigned char) ((i)); 	\
+}
+
+#define GETU64_BE(a) ( \
+	((unsigned long) (a)[0] << 56) | \
+	((unsigned long) (a)[1] << 48) | \
+	((unsigned long) (a)[2] << 40) | \
+	((unsigned long) (a)[3] << 32) | \
+	((unsigned long) (a)[4] << 24) | \
+	((unsigned long) (a)[5] << 16) | \
+	((unsigned long) (a)[6] <<  8) | \
+	((unsigned long) (a)[7])         \
+)
+
+#define PUTU64_BE(a, i) { \
+	(a)[0] = (unsigned char) ((i) >> 56); \
+	(a)[1] = (unsigned char) ((i) >> 48); \
+	(a)[2] = (unsigned char) ((i) >> 40); \
+	(a)[3] = (unsigned char) ((i) >> 32); \
+	(a)[4] = (unsigned char) ((i) >> 24); \
+	(a)[5] = (unsigned char) ((i) >> 16); \
+	(a)[6] = (unsigned char) ((i) >>  8); \
+	(a)[7] = (unsigned char) ((i));       \
+}
+
+#define ROTR32(v, n)	((v >> n) | (v << (32 - n)))
+#define ROTR64(v, n)	((v >> n) | (v << (64 - n)))
+
+#endif /* __UTILS_H */

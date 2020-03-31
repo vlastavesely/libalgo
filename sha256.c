@@ -1,5 +1,5 @@
 #include "sha256.h"
-#include "macros.h"
+#include "utils.h"
 #include <string.h> /* memcpy */
 
 static const unsigned int k[64] = {

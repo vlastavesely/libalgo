@@ -42,15 +42,6 @@ static const unsigned char ciphertext_256[] = {
 	0xea, 0xfc, 0x49, 0x90, 0x4b, 0x49, 0x60, 0x89
 };
 
-static void compare_bufs(const unsigned char *a, const unsigned char *b,
-			 unsigned int n)
-{
-	unsigned int i;
-
-	for (i = 0; i < n; i++)
-		ck_assert_int_eq(a[i], b[i]);
-}
-
 static void test_rijndael(const unsigned char *key, const unsigned char *ct,
 			  unsigned int bits)
 {
@@ -59,10 +50,10 @@ static void test_rijndael(const unsigned char *key, const unsigned char *ct,
 
 	rijndael_prepare_key(&subkeys, key, bits);
 	rijndael_encrypt(&subkeys, buf, plaintext);
-	compare_bufs(ct, buf, 16);
+	ck_assert_byte_array_eq(ct, buf, 16);
 
 	rijndael_decrypt(&subkeys, buf, buf);
-	compare_bufs(plaintext, buf, 16);
+	ck_assert_byte_array_eq(plaintext, buf, 16);
 
 	rijndael_wipe_key(&subkeys);
 }

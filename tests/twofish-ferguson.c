@@ -52,15 +52,6 @@ static const unsigned char c256[] = {
 	0x05, 0x93, 0x1c, 0xb6, 0xd4, 0x08, 0xe7, 0xfa
 };
 
-static void compare_bufs(const unsigned char *a, const unsigned char *b,
-			 unsigned int n)
-{
-	unsigned int i;
-
-	for (i = 0; i < n; i++)
-		ck_assert_int_eq(a[i], b[i]);
-}
-
 static void test_twofish(const unsigned char *key, const unsigned char *pt,
 			 const unsigned char *ct, unsigned int bits)
 {
@@ -69,10 +60,10 @@ static void test_twofish(const unsigned char *key, const unsigned char *pt,
 
 	twofish_prepare_key(&subkeys, key, bits);
 	twofish_encrypt(&subkeys, buf, pt);
-	compare_bufs(ct, buf, 16);
+	ck_assert_byte_array_eq(ct, buf, 16);
 
 	twofish_decrypt(&subkeys, buf, buf);
-	compare_bufs(pt, buf, 16);
+	ck_assert_byte_array_eq(pt, buf, 16);
 
 	twofish_wipe_key(&subkeys);
 }
