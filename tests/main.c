@@ -3,6 +3,7 @@
 #include "twofish-ferguson.h"
 #include "serpent.h"
 #include "whirlpool.h"
+#include "sha256.h"
 
 static struct Suite *create_test_suite()
 {
@@ -17,6 +18,7 @@ static struct Suite *create_test_suite()
 	register_twofish_ferguson_tests(test_case);
 	register_serpent_tests(test_case);
 	register_whirlpool_tests(test_case);
+	register_sha256_tests(test_case);
 
 	return suite;
 }
