@@ -85,6 +85,7 @@ START_TEST(test_twofish_256)
 	test_twofish(k256, p256, c256, 256);
 }
 END_TEST
+
 void register_twofish_ferguson_tests(struct TCase *test_case)
 {
 	tcase_add_test(test_case, test_twofish_128);

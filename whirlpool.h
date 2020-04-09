@@ -1,6 +1,7 @@
 #ifndef __WHIRLPOOL_H
 #define __WHIRLPOOL_H
 
+#define WHIRLPOOL_STATE_LEN 64
 #define WHIRLPOOL_DIGEST_LEN 64
 
 struct whirlpool_state {

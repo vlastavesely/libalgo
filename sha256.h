@@ -1,6 +1,7 @@
 #ifndef __SHA256_H
 #define __SHA256_H
 
+#define SHA256_STATE_LEN 64
 #define SHA256_DIGEST_LEN 32
 
 struct sha256_state {

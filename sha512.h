@@ -1,6 +1,7 @@
 #ifndef __SHA512_H
 #define __SHA512_H
 
+#define SHA512_STATE_LEN 128
 #define SHA512_DIGEST_LEN 64
 
 struct sha512_state {
