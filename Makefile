@@ -16,9 +16,8 @@ TEST_OBJECTS = $(TEST_SOURCES:%.c=%.o)
 TEST_CFLAGS  = $(CFLAGS) $(shell pkg-config --cflags check)
 TEST_LIBS    = $(LIBS) $(shell pkg-config --libs check)
 
-all:
 
-.PHONY: all test clean
+.PHONY: all install uninstall test clean
 
 all: $(LIB)
 
@@ -32,6 +31,15 @@ $(LIB): $(OBJECTS)
 
 test: $(TEST_PROG)
 	LD_LIBRARY_PATH=$$(pwd) $(TEST_PROG)
+
+install:
+	install -m 0755 -d /usr/local/include/$(LIBNAME)
+	install -m 0755 $(LIB) /usr/lib
+	install -m 0644 $(patsubst %.c,%.h,$(wildcard *.c)) /usr/local/include/$(LIBNAME)
+
+uninstall:
+	$(RM) -r /usr/local/include/$(LIBNAME)
+	$(RM) /usr/lib/$(LIB)
 
 $(TEST_PROG): $(TEST_OBJECTS) $(LIB)
 	$(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -l$(LIBNAME)
