@@ -7,7 +7,7 @@
 struct sha256_state {
 	unsigned int h[8];
 	unsigned char buf[64];
-	unsigned long len;
+	unsigned long long len;
 };
 
 void sha256_init(struct sha256_state *state);

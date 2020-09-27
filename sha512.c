@@ -2,7 +2,7 @@
 #include "utils.h"
 #include <string.h> /* memcpy */
 
-static const unsigned long k[80] = {
+static const uint64_t k[80] = {
 	0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f,
 	0xe9b5dba58189dbbc, 0x3956c25bf348b538, 0x59f111f1b605d019,
 	0x923f82a4af194f9b, 0xab1c5ed5da6d8118, 0xd807aa98a3030242,
@@ -69,8 +69,8 @@ void sha512_init(struct sha512_state *state)
 
 static void sha512_block(struct sha512_state *state, const unsigned char *in)
 {
-	unsigned long a, b, c, d, e, f, g, h, t1, t2;
-	unsigned long w[16];
+	uint64_t a, b, c, d, e, f, g, h, t1, t2;
+	uint64_t w[16];
 
 	a = state->h[0];
 	b = state->h[1];

@@ -14,7 +14,7 @@
  *      ``The Whirlpool hashing function,''
  *      NESSIE submission, 2000 (tweaked version, 2001),
  *      <https://www.cosic.esat.kuleuven.ac.be/nessie/workshop/submissions/whirlpool.zip>
- * 
+ *
  * @author  Paulo S.L.M. Barreto
  * @author  Vincent Rijmen.
  *
@@ -59,6 +59,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <time.h>
 
 #include "whirlpool.h"
@@ -72,10 +73,9 @@
 #define LENGTHBYTES 32
 #define LENGTHBITS  (8*LENGTHBYTES) /* 256 */
 
-
 typedef unsigned char u8;
 typedef unsigned int u32;
-typedef unsigned long u64;
+typedef uint64_t u64;
 
 #define LL(v)   (v##ULL)
 

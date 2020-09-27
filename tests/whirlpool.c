@@ -4,7 +4,7 @@
 
 /*
  * The test vectors are from the package with the source code:
- * https://web.archive.org/web/20171129084214/http://www.larc.usp.br/~pbarreto/whirlpool.zip 
+ * https://web.archive.org/web/20171129084214/http://www.larc.usp.br/~pbarreto/whirlpool.zip
  */
 
 static const unsigned char digest_empty[] = {

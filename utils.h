@@ -1,6 +1,8 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
+#include <stdint.h>
+
 #define GETU32_BE(a) ( \
 	((unsigned int) (a)[0] << 24) | \
 	((unsigned int) (a)[1] << 16) | \
@@ -16,14 +18,14 @@
 }
 
 #define GETU64_BE(a) ( \
-	((unsigned long) (a)[0] << 56) | \
-	((unsigned long) (a)[1] << 48) | \
-	((unsigned long) (a)[2] << 40) | \
-	((unsigned long) (a)[3] << 32) | \
-	((unsigned long) (a)[4] << 24) | \
-	((unsigned long) (a)[5] << 16) | \
-	((unsigned long) (a)[6] <<  8) | \
-	((unsigned long) (a)[7])         \
+	((uint64_t) (a)[0] << 56) | \
+	((uint64_t) (a)[1] << 48) | \
+	((uint64_t) (a)[2] << 40) | \
+	((uint64_t) (a)[3] << 32) | \
+	((uint64_t) (a)[4] << 24) | \
+	((uint64_t) (a)[5] << 16) | \
+	((uint64_t) (a)[6] <<  8) | \
+	((uint64_t) (a)[7])         \
 )
 
 #define PUTU64_BE(a, i) { \

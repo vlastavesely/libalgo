@@ -4,10 +4,12 @@
 #define SHA512_STATE_LEN 128
 #define SHA512_DIGEST_LEN 64
 
+#include <stdint.h>
+
 struct sha512_state {
-	unsigned long h[8];
+	uint64_t h[8];
 	unsigned char buf[128];
-	unsigned long len;
+	unsigned long long len;
 };
 
 void sha512_init(struct sha512_state *state);
