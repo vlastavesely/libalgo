@@ -39,7 +39,8 @@
 	(a)[7] = (unsigned char) ((i));       \
 }
 
-#define ROTR32(v, n)	((v >> n) | (v << (32 - n)))
+#define ROTR32(v, n)	(((v) >> n) | ((v) << (32 - n)))
+#define ROTL32(v, n)	(((v) << n) | ((v) >> (32 - n)))
 #define ROTR64(v, n)	((v >> n) | (v << (64 - n)))
 
 /*

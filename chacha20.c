@@ -45,8 +45,6 @@ void chacha20_wipe_key(struct chacha20_subkeys *subkeys)
 	subkeys->i = 0;
 }
 
-#define ROTL32(v, n)   (((v) << n) | ((v) >> (32 - n)))
-
 #define QUARTERROUND(a, b, c, d)	\
 	a += b; d = ROTL32(d ^ a, 16);	\
 	c += d;	b = ROTL32(b ^ c, 12);	\

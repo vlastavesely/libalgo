@@ -15,6 +15,8 @@
 //#define BLOCK_SWAP
 
 #include "serpent.h"
+#include "config.h"
+#include "utils.h"
 
 /* Partially optimised Serpent S Box boolean functions derived  */
 /* using a recursive descent analyser but without a full search */
@@ -32,9 +34,13 @@
 
 typedef unsigned int    u4byte; /* a 32 bit unsigned integer type   */
 
-#define rotr(x,n)   (((x) >> ((int)(n))) | ((x) << (32 - (int)(n))))
-#define rotl(x,n)   (((x) << ((int)(n))) | ((x) >> (32 - (int)(n))))
-#define bswap(x)    ((rotl(x, 8) & 0x00ff00ff) | (rotr(x, 8) & 0xff00ff00))
+#if WORDS_BIGENDIAN
+#define BLOCK_SWAP
+#endif
+
+#define rotr(x,n)   ROTR32(x, n)
+#define rotl(x,n)   ROTL32(x, n)
+#define bswap(x)    BSWAP32(x)
 
 #ifdef  BLOCK_SWAP
 #define BYTE_SWAP
@@ -450,7 +456,7 @@ int serpent_prepare_key(struct serpent_subkeys *subkeys, const unsigned char *ke
     while(i < lk)
     {
 #ifdef  BLOCK_SWAP
-        l_key[i] = io_swap(in_key[lk - i - 1]);
+        l_key[i] = io_swap(in_key[i]);
 #else
         l_key[i] = in_key[i];
 #endif
@@ -532,8 +538,8 @@ void serpent_encrypt(struct serpent_subkeys *subkeys, unsigned char *out,
     u4byte *out_blk = (u4byte *) out;
 
 #ifdef  BLOCK_SWAP
-    a = io_swap(in_blk[3]); b = io_swap(in_blk[2]);
-    c = io_swap(in_blk[1]); d = io_swap(in_blk[0]);
+    a = io_swap(in_blk[0]); b = io_swap(in_blk[1]);
+    c = io_swap(in_blk[2]); d = io_swap(in_blk[3]);
 #else
     a = in_blk[0]; b = in_blk[1]; c = in_blk[2]; d = in_blk[3];
 #endif
@@ -572,8 +578,8 @@ void serpent_encrypt(struct serpent_subkeys *subkeys, unsigned char *out,
     k_xor(31,e,f,g,h); sb7(e,f,g,h,a,b,c,d); k_xor(32,a,b,c,d);
 
 #ifdef  BLOCK_SWAP
-    out_blk[3] = io_swap(a); out_blk[2] = io_swap(b);
-    out_blk[1] = io_swap(c); out_blk[0] = io_swap(d);
+    out_blk[0] = io_swap(a); out_blk[1] = io_swap(b);
+    out_blk[2] = io_swap(c); out_blk[3] = io_swap(d);
 #else
     out_blk[0] = a; out_blk[1] = b; out_blk[2] = c; out_blk[3] = d;
 #endif
@@ -590,8 +596,8 @@ void serpent_decrypt(struct serpent_subkeys *subkeys, unsigned char *out,
     u4byte *out_blk = (u4byte *) out;
 
 #ifdef  BLOCK_SWAP
-    a = io_swap(in_blk[3]); b = io_swap(in_blk[2]);
-    c = io_swap(in_blk[1]); d = io_swap(in_blk[0]);
+    a = io_swap(in_blk[0]); b = io_swap(in_blk[1]);
+    c = io_swap(in_blk[2]); d = io_swap(in_blk[3]);
 #else
     a = in_blk[0]; b = in_blk[1]; c = in_blk[2]; d = in_blk[3];
 #endif
@@ -630,8 +636,8 @@ void serpent_decrypt(struct serpent_subkeys *subkeys, unsigned char *out,
     irot(e,f,g,h); ib0(e,f,g,h,a,b,c,d); k_xor( 0,a,b,c,d);
 
 #ifdef  BLOCK_SWAP
-    out_blk[3] = io_swap(a); out_blk[2] = io_swap(b);
-    out_blk[1] = io_swap(c); out_blk[0] = io_swap(d);
+    out_blk[0] = io_swap(a); out_blk[1] = io_swap(b);
+    out_blk[2] = io_swap(c); out_blk[3] = io_swap(d);
 #else
     out_blk[0] = a; out_blk[1] = b; out_blk[2] = c; out_blk[3] = d;
 #endif
