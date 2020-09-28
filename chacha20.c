@@ -3,6 +3,8 @@
  * https://tools.ietf.org/html/rfc7539
  */
 #include "chacha20.h"
+#include "config.h"
+#include "utils.h"
 
 #define GETU32_LE(a) ( \
 	((unsigned int)(a)[3] << 24) | \
@@ -85,6 +87,12 @@ static void chacha20_init_state(struct chacha20_subkeys *subkeys)
 	state[15] = subkeys->nonce[2];
 }
 
+#if WORDS_BIGENDIAN
+#define CPU_TO_LE(i) BSWAP32(i)
+#else
+#define CPU_TO_LE(i) (i)
+#endif
+
 static void chacha20_process(struct chacha20_subkeys *subkeys)
 {
 	unsigned int a, b, c, d, e, f, g, h;
@@ -122,22 +130,22 @@ static void chacha20_process(struct chacha20_subkeys *subkeys)
 	DOUBLEROUND(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p); /*  9 */
 	DOUBLEROUND(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p); /* 10 */
 
-	state[ 0] += a;
-	state[ 1] += b;
-	state[ 2] += c;
-	state[ 3] += d;
-	state[ 4] += e;
-	state[ 5] += f;
-	state[ 6] += g;
-	state[ 7] += h;
-	state[ 8] += i;
-	state[ 9] += j;
-	state[10] += k;
-	state[11] += l;
-	state[12] += m;
-	state[13] += n;
-	state[14] += o;
-	state[15] += p;
+	state[ 0] = CPU_TO_LE(state[ 0] + a);
+	state[ 1] = CPU_TO_LE(state[ 1] + b);
+	state[ 2] = CPU_TO_LE(state[ 2] + c);
+	state[ 3] = CPU_TO_LE(state[ 3] + d);
+	state[ 4] = CPU_TO_LE(state[ 4] + e);
+	state[ 5] = CPU_TO_LE(state[ 5] + f);
+	state[ 6] = CPU_TO_LE(state[ 6] + g);
+	state[ 7] = CPU_TO_LE(state[ 7] + h);
+	state[ 8] = CPU_TO_LE(state[ 8] + i);
+	state[ 9] = CPU_TO_LE(state[ 9] + j);
+	state[10] = CPU_TO_LE(state[10] + k);
+	state[11] = CPU_TO_LE(state[11] + l);
+	state[12] = CPU_TO_LE(state[12] + m);
+	state[13] = CPU_TO_LE(state[13] + n);
+	state[14] = CPU_TO_LE(state[14] + o);
+	state[15] = CPU_TO_LE(state[15] + p);
 
 	subkeys->i++;
 	subkeys->avail = 64;

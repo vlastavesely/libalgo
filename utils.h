@@ -42,4 +42,69 @@
 #define ROTR32(v, n)	((v >> n) | (v << (32 - n)))
 #define ROTR64(v, n)	((v >> n) | (v << (64 - n)))
 
+/*
+ * Byte-order swap functions for conversion from big-endian to little-endian
+ * and vice versa.
+ */
+/* gcc 4.3 and higher */
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+
+	/*
+	 * These functions check whether CPU supports Intel's instruction BSWAP.
+	 * If so, this instruction will be used, portable code otherwise.
+	 */
+	#ifndef BSWAP32
+	#define BSWAP32(n) __builtin_bswap32(n)
+	#endif
+
+	#ifndef BSWAP64
+	#define BSWAP64(n) __builtin_bswap64(n)
+	#endif
+
+	#ifndef BSWAP16 /* This one does not have built-in function. */
+	#define BSWAP16(n) ((n) << 8 | ((n) >> 8 & 0x00FF))
+	#endif
+
+#else
+
+	/*
+	 * In Visual C++ should be possible call BSWAP instruction in this way:
+	 *
+	 *	#include <intrin.h>
+	 *
+	 *	unsigned short _byteswap_ushort(unsigned short value);
+	 *	unsigned long _byteswap_ulong(unsigned long value);
+	 *	unsigned __int64 _byteswap_uint64(unsigned __int64 value);
+	 *
+	 * but it is not tested since I do not use Windows...
+	 */
+
+	#ifndef BSWAP16
+	#define BSWAP16(n) \
+		((n) << 8 | \
+		((n) >> 8 & 0x00FF))
+	#endif
+
+	#ifndef BSWAP32
+	#define BSWAP32(n) \
+		((n) >> 24) | \
+		(((n) << 8) & 0x00FF0000L) | \
+		(((n) >> 8) & 0x0000FF00L) | \
+		((n) << 24)
+	#endif
+
+	#ifndef BSWAP64
+	#define BSWAP64(n) \
+		((n) >> 56) | \
+		(((n) << 40) & 0x00FF000000000000LL) | \
+		(((n) << 24) & 0x0000FF0000000000LL) | \
+		(((n) << 8)  & 0x000000FF00000000LL) | \
+		(((n) >> 8)  & 0x00000000FF000000LL) | \
+		(((n) >> 24) & 0x0000000000FF0000LL) | \
+		(((n) >> 40) & 0x000000000000FF00LL) | \
+		((n) << 56)
+	#endif
+
+#endif
+
 #endif /* __UTILS_H */
