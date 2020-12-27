@@ -2,3 +2,13 @@
 /tests/test
 *.o
 *.d
+
+/config.h*
+/configure
+/configure.scan
+/autoscan.log
+/autom4te.cache
+/config.h.in~
+/config.log
+/config.status
+/aclocal.m4
