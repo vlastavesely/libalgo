@@ -176,11 +176,80 @@ int aes_ni_prepare_key(struct aes_ni_subkeys *subkeys, const unsigned char *key,
 void aes_ni_encrypt(struct aes_ni_subkeys *subkeys, unsigned char *out,
 		    const unsigned char *in)
 {
+	__m128i state = _mm_loadu_si128((__m128i *) in);
+	__m128i *k = subkeys->ek;
+	unsigned int nr = subkeys->nr;
+
+	state = _mm_xor_si128(state, k[0]);
+	state = _mm_aesenc_si128(state, k[1]);
+	state = _mm_aesenc_si128(state, k[2]);
+	state = _mm_aesenc_si128(state, k[3]);
+	state = _mm_aesenc_si128(state, k[4]);
+	state = _mm_aesenc_si128(state, k[5]);
+	state = _mm_aesenc_si128(state, k[6]);
+	state = _mm_aesenc_si128(state, k[7]);
+	state = _mm_aesenc_si128(state, k[8]);
+	state = _mm_aesenc_si128(state, k[9]);
+
+	switch (nr) {
+	case 10:
+		state = _mm_aesenclast_si128(state, k[10]);
+		break;
+	case 12:
+		state = _mm_aesenc_si128(state, k[10]);
+		state = _mm_aesenc_si128(state, k[11]);
+		state = _mm_aesenclast_si128(state, k[12]);
+		break;
+	case 14:
+		state = _mm_aesenc_si128(state, k[10]);
+		state = _mm_aesenc_si128(state, k[11]);
+		state = _mm_aesenc_si128(state, k[12]);
+		state = _mm_aesenc_si128(state, k[13]);
+		state = _mm_aesenclast_si128(state, k[14]);
+		break;
+	}
+
+	_mm_storeu_si128((__m128i *) out, state);
+
 }
 
 void aes_ni_decrypt(struct aes_ni_subkeys *subkeys, unsigned char *out,
 		    const unsigned char *in)
 {
+	__m128i state = _mm_loadu_si128((__m128i *) in);
+	__m128i *k = subkeys->dk;
+	unsigned int nr = subkeys->nr;
+
+	state = _mm_xor_si128(state, k[0]);
+	state = _mm_aesdec_si128(state, k[1]);
+	state = _mm_aesdec_si128(state, k[2]);
+	state = _mm_aesdec_si128(state, k[3]);
+	state = _mm_aesdec_si128(state, k[4]);
+	state = _mm_aesdec_si128(state, k[5]);
+	state = _mm_aesdec_si128(state, k[6]);
+	state = _mm_aesdec_si128(state, k[7]);
+	state = _mm_aesdec_si128(state, k[8]);
+	state = _mm_aesdec_si128(state, k[9]);
+
+	switch (nr) {
+	case 10:
+		state = _mm_aesdeclast_si128(state, k[10]);
+		break;
+	case 12:
+		state = _mm_aesdec_si128(state, k[10]);
+		state = _mm_aesdec_si128(state, k[11]);
+		state = _mm_aesdeclast_si128(state, k[12]);
+		break;
+	case 14:
+		state = _mm_aesdec_si128(state, k[10]);
+		state = _mm_aesdec_si128(state, k[11]);
+		state = _mm_aesdec_si128(state, k[12]);
+		state = _mm_aesdec_si128(state, k[13]);
+		state = _mm_aesdeclast_si128(state, k[14]);
+		break;
+	}
+
+	_mm_storeu_si128((__m128i *) out, state);
 }
 
 void aes_ni_wipe_key(struct aes_ni_subkeys *subkeys)
