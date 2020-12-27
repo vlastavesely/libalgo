@@ -1,0 +1,20 @@
+#ifndef __HMAC_SHA1_H
+#define __HMAC_SHA1_H
+
+#include "sha1.h"
+
+struct hmac_sha1_state {
+	struct sha1_state state;
+	unsigned char ipad[SHA1_STATE_LEN];
+	unsigned char opad[SHA1_STATE_LEN];
+};
+
+void hmac_sha1_init(struct hmac_sha1_state *state,
+		    const unsigned char *key, unsigned int keylen);
+void hmac_sha1_update(struct hmac_sha1_state *state,
+		      const unsigned char *data, unsigned int len);
+void hmac_sha1_final(struct hmac_sha1_state *state,
+		     unsigned char *digest);
+void hmac_sha1_wipe_state(struct hmac_sha1_state *state);
+
+#endif /* __HMAC_SHA1_H */

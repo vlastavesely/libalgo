@@ -9,6 +9,7 @@
 #include "chacha20.h"
 #include "arcfour.h"
 #include "hmac-whirlpool.h"
+#include "hmac-sha1.h"
 #include "hmac-sha256.h"
 #include "hmac-sha512.h"
 #include "utils.h"
@@ -32,6 +33,7 @@ static struct Suite *create_test_suite()
 	register_chacha20_tests(test_case);
 	register_arcfour_tests(test_case);
 	register_hmac_whirlpool_tests(test_case);
+	register_hmac_sha1_tests(test_case);
 	register_hmac_sha256_tests(test_case);
 	register_hmac_sha512_tests(test_case);
 	register_utils_tests(test_case);
