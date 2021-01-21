@@ -1,14 +1,12 @@
 CC = gcc
 RM = rm -f
-CFLAGS = -Ofast -Wall
-LIBS =
+CFLAGS  = @CFLAGS@ -Wall -Ofast -fPIC
+LIBS    = @LIBS@
 
 LIBNAME = algo
 LIB     = lib$(LIBNAME).so
 SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:%.c=%.o)
-CFLAGS  = -Wall -Ofast -fPIC
-LIBS    =
 
 TEST_PROG    = tests/test
 TEST_SOURCES = $(wildcard tests/*.c)
