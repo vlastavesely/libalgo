@@ -14,6 +14,12 @@ TEST_OBJECTS = $(TEST_SOURCES:%.c=%.o)
 TEST_CFLAGS  = $(CFLAGS) $(shell pkg-config --cflags check)
 TEST_LIBS    = $(LIBS) $(shell pkg-config --libs check)
 
+ifndef V
+QUIET_CC    = @echo "   CC    $@";
+QUIET_LD    = @echo "   LINK  $@";
+QUIET_GEN   = @echo "   GEN   $@";
+endif
+
 
 .PHONY: all install uninstall test clean
 
@@ -22,10 +28,10 @@ all: $(LIB)
 include $(wildcard *.d tests/*.d)
 
 $(LIB): $(OBJECTS)
-	$(CC) -MMD -MP -shared $^ -o $@ $(CFLAGS) $(LIBS)
+	$(QUIET_LD) $(CC) -MMD -MP -shared $^ -o $@ $(CFLAGS) $(LIBS)
 
 %.o: %.c
-	$(CC) -MMD -MP -c $< -o $@ $(CFLAGS) $(LIBS)
+	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(CFLAGS) $(LIBS)
 
 test: $(TEST_PROG)
 	LD_LIBRARY_PATH=$$(pwd) $(TEST_PROG)
@@ -40,10 +46,10 @@ uninstall:
 	$(RM) /usr/lib/$(LIB)
 
 $(TEST_PROG): $(TEST_OBJECTS) $(LIB)
-	$(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -l$(LIBNAME)
+	$(QUIET_LD) $(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -l$(LIBNAME)
 
 tests/%.o: tests/%.c
-	$(CC) -MMD -MP -c $< -o $@ $(TEST_CFLAGS) $(TEST_LIBS)
+	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(TEST_CFLAGS) $(TEST_LIBS)
 
 clean:
 	$(RM) $(TEST_PROG) *.so *.o */*.o */*.d *.d
@@ -52,4 +58,4 @@ distclean: clean
 	$(RM) -r autom4te.cache
 	$(RM) Makefile configure configure.scan
 	$(RM) config.h* config.log config.status
-	$(RM) aclocal.m4
+	$(RM) aclocal.m4 install-sh
