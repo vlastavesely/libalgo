@@ -13,7 +13,10 @@
 #include "hmac-sha256.h"
 #include "hmac-sha512.h"
 #include "utils.h"
+
+#ifdef HAVE_AES_INSTRUCTIONS
 #include "aes-ni.h"
+#endif
 
 static struct Suite *create_test_suite()
 {
@@ -38,7 +41,10 @@ static struct Suite *create_test_suite()
 	register_hmac_sha256_tests(test_case);
 	register_hmac_sha512_tests(test_case);
 	register_utils_tests(test_case);
+
+	#ifdef HAVE_AES_INSTRUCTIONS
 	register_aes_ni_tests(test_case);
+	#endif
 
 	return suite;
 }

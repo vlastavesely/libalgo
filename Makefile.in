@@ -5,14 +5,37 @@ LIBS    = @LIBS@
 
 LIBNAME = algo
 LIB     = lib$(LIBNAME).so
-SOURCES = $(wildcard *.c)
-OBJECTS = $(SOURCES:%.c=%.o)
+
+BLOCK_CIPHERS = rijndael-alg-fst.o twofish-ferguson.o serpent.o
+STREAM_CIPHERS = arcfour.o chacha20.o
+HASHES = sha1.o sha256.o sha512.o whirlpool.o
+HMACS = hmac-sha1.o hmac-sha256.o hmac-sha512.o hmac-whirlpool.o
+
+OBJECTS = $(BLOCK_CIPHERS) $(STREAM_CIPHERS) $(HASHES) $(HMACS)
+
+USE_AES_NI = @USE_AES_NI@
+ifeq ($(USE_AES_NI),yes)
+	OBJECTS += aes-ni.o
+endif
+
+HEADERS = $(OBJECTS:%.o=%.h)
 
 TEST_PROG    = tests/test
-TEST_SOURCES = $(wildcard tests/*.c)
-TEST_OBJECTS = $(TEST_SOURCES:%.c=%.o)
+TEST_OBJECTS = tests/main.o tests/utils.o $(OBJECTS:%.o=tests/%.o)
 TEST_CFLAGS  = $(CFLAGS) $(shell pkg-config --cflags check)
 TEST_LIBS    = $(LIBS) $(shell pkg-config --libs check)
+
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+MKDIR_P = @MKDIR_P@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+datarootdir = @datarootdir@
+
+LIBDIR = @libdir@
+INCDIR = @includedir@
+
 
 ifndef V
 QUIET_CC    = @echo "   CC    $@";
@@ -36,14 +59,27 @@ $(LIB): $(OBJECTS)
 test: $(TEST_PROG)
 	LD_LIBRARY_PATH=$$(pwd) $(TEST_PROG)
 
-install:
-	install -m 0755 -d /usr/include/$(LIBNAME)
-	install -m 0755 $(LIB) /usr/lib
-	install -m 0644 $(patsubst %.c,%.h,$(wildcard *.c)) /usr/include/$(LIBNAME)
+.PHONY: install install-libalgo install-libalgo-dev
 
-uninstall:
-	$(RM) -r /usr/include/$(LIBNAME)
-	$(RM) /usr/lib/$(LIB)
+install: install-libalgo install-libalgo-dev
+
+install-libalgo: all
+	$(MKDIR_P) $(LIBDIR)
+	$(INSTALL_DATA) $(LIB) $(LIBDIR)
+
+install-libalgo-dev:
+	$(MKDIR_P) $(INCDIR)/algo
+	$(INSTALL_DATA) $(HEADERS) $(INCDIR)/algo
+
+.PHONY: uninstall uninstall-libalgo uninstall-libalgo-dev
+
+uninstall: uninstall-libalgo uninstall-libalgo-dev
+
+uninstall-libalgo:
+	$(RM) $(LIBDIR)/$(LIB)
+
+uninstall-libalgo-dev:
+	$(RM) $(INCDIR)/algo
 
 $(TEST_PROG): $(TEST_OBJECTS) $(LIB)
 	$(QUIET_LD) $(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -l$(LIBNAME)

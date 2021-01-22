@@ -11,6 +11,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
+AC_PROG_MKDIR_P
 
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h stdint.h stdlib.h string.h])
@@ -41,6 +42,7 @@ AC_ARG_ENABLE(aes-ni,
 		CFLAGS="$CFLAGS -maes"
 ], [AC_MSG_RESULT(no)])
 
+AC_SUBST([USE_AES_NI])
 if test "x$USE_AES_NI" = xyes; then
 	AX_GCC_X86_CPU_SUPPORTS([aes])
 fi
