@@ -4,6 +4,7 @@
 *.d
 
 /Makefile
+/libalgo.pc
 /config.h*
 /configure
 /configure.scan

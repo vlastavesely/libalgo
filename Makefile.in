@@ -29,12 +29,12 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 MKDIR_P = @MKDIR_P@
 
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-datarootdir = @datarootdir@
-
-LIBDIR = @libdir@
-INCDIR = @includedir@
+prefix       = @prefix@
+exec_prefix  = @exec_prefix@
+datarootdir  = @datarootdir@
+libdir       = @libdir@
+incdir       = @includedir@
+pkgconfigdir = @pkgconfigdir@
 
 
 ifndef V
@@ -64,22 +64,24 @@ test: $(TEST_PROG)
 install: install-libalgo install-libalgo-dev
 
 install-libalgo: all
-	$(MKDIR_P) $(LIBDIR)
-	$(INSTALL_DATA) $(LIB) $(LIBDIR)
+	$(MKDIR_P) $(libdir)
+	$(INSTALL_DATA) $(LIB) $(libdir)
 
 install-libalgo-dev:
-	$(MKDIR_P) $(INCDIR)/algo
-	$(INSTALL_DATA) $(HEADERS) $(INCDIR)/algo
+	$(MKDIR_P) $(incdir)/algo $(pkgconfigdir)
+	$(INSTALL_DATA) $(HEADERS) $(incdir)/algo
+	$(INSTALL_DATA) libalgo.pc $(pkgconfigdir)
 
 .PHONY: uninstall uninstall-libalgo uninstall-libalgo-dev
 
 uninstall: uninstall-libalgo uninstall-libalgo-dev
 
 uninstall-libalgo:
-	$(RM) $(LIBDIR)/$(LIB)
+	$(RM) $(libdir)/$(LIB)
 
 uninstall-libalgo-dev:
-	$(RM) $(INCDIR)/algo
+	$(RM) $(incdir)/algo
+	$(RM) $(pkgconfigdir)/libalgo.pc
 
 $(TEST_PROG): $(TEST_OBJECTS) $(LIB)
 	$(QUIET_LD) $(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -l$(LIBNAME)
@@ -88,7 +90,7 @@ tests/%.o: tests/%.c
 	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(TEST_CFLAGS) $(TEST_LIBS)
 
 clean:
-	$(RM) $(TEST_PROG) *.so *.o */*.o */*.d *.d
+	$(RM) $(TEST_PROG) *.so *.o */*.o */*.d *.d libalgo.pc
 
 distclean: clean
 	$(RM) -r autom4te.cache

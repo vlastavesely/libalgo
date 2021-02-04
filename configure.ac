@@ -13,6 +13,9 @@ AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_MKDIR_P
 
+PKG_PROG_PKG_CONFIG
+PKG_INSTALLDIR
+
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h stdint.h stdlib.h string.h])
 
@@ -47,6 +50,6 @@ if test "x$USE_AES_NI" = xyes; then
 	AX_GCC_X86_CPU_SUPPORTS([aes])
 fi
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile libalgo.pc])
 
 AC_OUTPUT
