@@ -44,7 +44,7 @@ QUIET_GEN   = @echo "   GEN   $@";
 endif
 
 
-.PHONY: all install uninstall test clean
+.PHONY: all test clean
 
 all: $(LIB)
 

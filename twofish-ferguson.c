@@ -1,7 +1,7 @@
 /*
- * Fast, portable, and easy-to-use Twofish implementation, 
+ * Fast, portable, and easy-to-use Twofish implementation,
  * Version 0.3.
- * Copyright (c) 2002 by Niels Ferguson. 
+ * Copyright (c) 2002 by Niels Ferguson.
  * (See further down for the almost-unrestricted licensing terms.)
  *
  * --------------------------------------------------------------------------
@@ -12,10 +12,10 @@
  * To incorporate this code into your program you should:
  * - Check the licensing terms further down in this comment.
  * - Fix the two type definitions in twofish.h to suit your platform.
- * - Fix a few definitions in twofish.c in the section marked 
- *   PLATFORM FIXES. There is one important ones that affects 
- *   functionality, and then a few definitions that you can optimise 
- *   for efficiency but those have no effect on the functionality. 
+ * - Fix a few definitions in twofish.c in the section marked
+ *   PLATFORM FIXES. There is one important ones that affects
+ *   functionality, and then a few definitions that you can optimise
+ *   for efficiency but those have no effect on the functionality.
  *   Don't change anything else.
  * - Put the code in your project and compile it.
  *
@@ -27,27 +27,27 @@
  *   data.
  * See the comments in the header file for details on these functions.
  * --------------------------------------------------------------------------
- * 
+ *
  * There are many Twofish implementation available for free on the web.
  * Most of them are hard to integrate into your own program.
- * As we like people to use our cipher, I thought I would make it easier. 
+ * As we like people to use our cipher, I thought I would make it easier.
  * Here is a free and easy-to-integrate Twofish implementation in C.
  * The latest version is always available from my personal home page at
  *    http://niels.ferguson.net/
  *
  * Integrating library code into a project is difficult because the library
- * header files interfere with the project's header files and code. 
+ * header files interfere with the project's header files and code.
  * And of course the project's header files interfere with the library code.
- * I've tried to resolve these problems here. 
- * The header file of this implementation is very light-weight. 
+ * I've tried to resolve these problems here.
+ * The header file of this implementation is very light-weight.
  * It contains two typedefs, a structure, and a few function declarations.
- * All names it defines start with "Twofish_". 
+ * All names it defines start with "Twofish_".
  * The header file is therefore unlikely to cause problems in your project.
  * The code file of this implementation doesn't need to include the header
  * files of the project. There is thus no danger of the project interfering
  * with all the definitions and macros of the Twofish code.
  * In most situations, all you need to do is fill in a few platform-specific
- * definitions in the header file and code file, 
+ * definitions in the header file and code file,
  * and you should be able to run the Twofish code in your project.
  * I estimate it should take you less than an hour to integrate this code
  * into your project, most of it spent reading the comments telling you what
@@ -56,11 +56,11 @@
  * For people using C++: it is very easy to wrap this library into a
  * TwofishKey class. One of the big advantages is that you can automate the
  * wiping of the key material in the destructor. I have not provided a C++
- * class because the interface depends too much on the abstract base class 
+ * class because the interface depends too much on the abstract base class
  * you use for block ciphers in your program, which I don't know about.
  *
- * This implementation is designed for use on PC-class machines. It uses the 
- * Twofish 'full' keying option which uses large tables. Total table size is 
+ * This implementation is designed for use on PC-class machines. It uses the
+ * Twofish 'full' keying option which uses large tables. Total table size is
  * around 5-6 kB for static tables plus 4.5 kB for each pre-processed key.
  * If you need an implementation that uses less memory,
  * take a look at Brian Gladman's code on his web site:
@@ -72,20 +72,20 @@
  *      http://www.counterpane.com/twofish.html
  * which has loads of options.
  * I believe these existing implementations are harder to re-use because they
- * are not clean libraries and they impose requirements on the environment. 
- * This implementation is very careful to minimise those, 
+ * are not clean libraries and they impose requirements on the environment.
+ * This implementation is very careful to minimise those,
  * and should be easier to integrate into any larger program.
  *
  * The default mode of this implementation is fully portable as it uses no
  * behaviour not defined in the C standard. (This is harder than you think.)
  * If you have any problems porting the default mode, please let me know
- * so that I can fix the problem. (But only if this code is at fault, I 
+ * so that I can fix the problem. (But only if this code is at fault, I
  * don't fix compilers.)
- * Most of the platform fixes are related to non-portable but faster ways 
+ * Most of the platform fixes are related to non-portable but faster ways
  * of implementing certain functions.
  *
  * In general I've tried to make the code as fast as possible, at the expense
- * of memory and code size. However, C does impose limits, and this 
+ * of memory and code size. However, C does impose limits, and this
  * implementation will be slower than an optimised assembler implementation.
  * But beware of assembler implementations: a good Pentium implementation
  * uses completely different code than a good Pentium II implementation.
@@ -96,16 +96,16 @@
  * If initialisation succeeds without calling the fatal routine, then
  * the implementation works. I don't think you can break the implementation
  * in such a way that it still passes the tests, unless you are malicious.
- * In other words: if the initialisation routine returns, 
- * you have successfully ported the implementation. 
+ * In other words: if the initialisation routine returns,
+ * you have successfully ported the implementation.
  * (Or not implemented the fatal routine properly, but that is your problem.)
  *
  * I'm indebted to many people who helped me in one way or another to write
- * this code. During the design of Twofish and the AES process I had very 
+ * this code. During the design of Twofish and the AES process I had very
  * extensive discussions of all implementation issues with various people.
- * Doug Whiting in particular provided a wealth of information. The Twofish 
- * team spent untold hours discussion various cipher features, and their 
- * implementation. Brian Gladman implemented all AES candidates in C, 
+ * Doug Whiting in particular provided a wealth of information. The Twofish
+ * team spent untold hours discussion various cipher features, and their
+ * implementation. Brian Gladman implemented all AES candidates in C,
  * and we had some fruitful discussions on how to implement Twofish in C.
  * Jan Nieuwenhuizen tested this code on Linux using GCC.
  *
@@ -113,16 +113,16 @@
  * The author hereby grants a perpetual license to everybody to
  * use this code for any purpose as long as the copyright message is included
  * in the source code of this or any derived work.
- * 
+ *
  * Yes, this means that you, your company, your club, and anyone else
  * can use this code anywhere you want. You can change it and distribute it
  * under the GPL, include it in your commercial product without releasing
- * the source code, put it on the web, etc. 
- * The only thing you cannot do is remove my copyright message, 
- * or distribute any source code based on this implementation that does not 
- * include my copyright message. 
- * 
- * I appreciate a mention in the documentation or credits, 
+ * the source code, put it on the web, etc.
+ * The only thing you cannot do is remove my copyright message,
+ * or distribute any source code based on this implementation that does not
+ * include my copyright message.
+ *
+ * I appreciate a mention in the documentation or credits,
  * but I understand if that is difficult to do.
  * I also appreciate it if you tell me where and why you used my code.
  *
@@ -132,14 +132,13 @@
  *
  * Niels
  */
-
 /*
  * DISCLAIMER: As I'm giving away my work for free, I'm of course not going
  * to accept any liability of any form. This code, or the Twofish cipher,
  * might very well be flawed; you have been warned.
  * This software is provided as-is, without any kind of warrenty or
- * guarantee. And that is really all you can expect when you download 
- * code for free from the Internet. 
+ * guarantee. And that is really all you can expect when you download
+ * code for free from the Internet.
  *
  * I think it is really sad that disclaimers like this seem to be necessary.
  * If people only had a little bit more common sense, and didn't come
@@ -157,15 +156,15 @@
  *      the C standard. UInt32 can be larger than 32 bits without problems.
  * Version 0.3, 2002-09-28
  *      Bugfix: use <string.h> instead of <memory.h> to adhere to ANSI/ISO.
- *      Rename BIG_ENDIAN macro to CPU_IS_BIG_ENDIAN. The gcc library 
- *      header <string.h> already defines BIG_ENDIAN, even though it is not 
+ *      Rename BIG_ENDIAN macro to CPU_IS_BIG_ENDIAN. The gcc library
+ *      header <string.h> already defines BIG_ENDIAN, even though it is not
  *      supposed to.
  */
 
 
-/* 
+/*
  * Minimum set of include files.
- * You should not need any application-specific include files for this code. 
+ * You should not need any application-specific include files for this code.
  * In fact, adding you own header files could break one of the many macros or
  * functions in this file. Be very careful.
  * Standard include files will probably be ok.
@@ -178,29 +177,29 @@
  * PLATFORM FIXES
  * ==============
  *
- * The following definitions have to be fixed for each particular platform 
- * you work on. If you have a multi-platform program, you no doubt have 
- * portable definitions that you can substitute here without changing the 
+ * The following definitions have to be fixed for each particular platform
+ * you work on. If you have a multi-platform program, you no doubt have
+ * portable definitions that you can substitute here without changing the
  * rest of the code.
  */
 
 typedef unsigned char   Twofish_Byte;
 typedef unsigned int    Twofish_UInt32;
 
-/* 
- * Function called if something is fatally wrong with the implementation. 
+/*
+ * Function called if something is fatally wrong with the implementation.
  * This fatal function is called when a coding error is detected in the
  * Twofish implementation, or when somebody passes an obviously erroneous
  * parameter to this implementation. There is not much you can do when
  * the code contains bugs, so we just stop.
- * 
+ *
  * The argument is a string. Ideally the fatal function prints this string
  * as an error message. Whatever else this function does, it should never
  * return. A typical implementation would stop the program completely after
  * printing the error message.
  *
- * This default implementation is not very useful, 
- * but does not assume anything about your environment. 
+ * This default implementation is not very useful,
+ * but does not assume anything about your environment.
  * It will at least let you know something is wrong....
  * I didn't want to include any libraries to print and error or so,
  * as this makes the code much harder to integrate in a project.
@@ -220,16 +219,16 @@ typedef unsigned int    Twofish_UInt32;
 /*
  * The rest of the settings are not important for the functionality
  * of this Twofish implementation. That is, their default settings
- * work on all platforms. You can change them to improve the 
+ * work on all platforms. You can change them to improve the
  * speed of the implementation on your platform. Erroneous settings
  * will result in erroneous implementations, but the self-test should
  * catch those.
  */
 
 
-/* 
- * Macros to rotate a Twofish_UInt32 value left or right by the 
- * specified number of bits. This should be a 32-bit rotation, 
+/*
+ * Macros to rotate a Twofish_UInt32 value left or right by the
+ * specified number of bits. This should be a 32-bit rotation,
  * and not rotation of, say, 64-bit values.
  *
  * Every encryption or decryption operation uses 32 of these rotations,
@@ -240,7 +239,7 @@ typedef unsigned int    Twofish_UInt32;
  * any higher bits off. The simplest way to do this is to 'and' the
  * value first with 0xffffffff and then shift it right. An optimising
  * compiler that has a 32-bit type can optimise this 'and' away.
- * 
+ *
  * Unfortunately there is no portable way of writing the constant
  * 0xffffffff. You don't know which suffix to use (U, or UL?)
  * The UINT32_MASK definition uses a bit of trickery. Shift-left
@@ -249,7 +248,7 @@ typedef unsigned int    Twofish_UInt32;
  * 2, cast it to a UInt32, shift it left 31 positions, and subtract one.
  * Another example of how to make something very simple extremely difficult.
  * I hate C.
- * 
+ *
  * The rotation macros are straightforward.
  * They are only applied to UInt32 values, which are _unsigned_
  * so the >> operator must do a logical shift that brings in zeroes.
@@ -267,9 +266,9 @@ typedef unsigned int    Twofish_UInt32;
 
 
 /*
- * Select data type for q-table entries. 
+ * Select data type for q-table entries.
  *
- * Larger entry types cost more memory (1.5 kB), and might be faster 
+ * Larger entry types cost more memory (1.5 kB), and might be faster
  * or slower depending on the CPU and compiler details.
  *
  * This choice only affects the static data size and the key setup speed.
@@ -283,19 +282,19 @@ typedef unsigned int    Twofish_UInt32;
  * Method to select a single byte from a UInt32.
  * WARNING: non-portable code if set; might not work on all platforms.
  *
- * Inside the inner loop of Twofish it is necessary to access the 4 
+ * Inside the inner loop of Twofish it is necessary to access the 4
  * individual bytes of a UInt32. This can be done using either shifts
  * and masks, or memory accesses.
  *
  * Set to 0 to use shift and mask operations for the byte selection.
- * This is more ALU intensive. It is also fully portable. 
- * 
+ * This is more ALU intensive. It is also fully portable.
+ *
  * Set to 1 to use memory accesses. The UInt32 is stored in memory and
  * the individual bytes are read from memory one at a time.
  * This solution is more memory-intensive, and not fully portable.
  * It might be faster on your platform, or not. If you use this option,
  * make sure you set the CPU_IS_BIG_ENDIAN flag appropriately.
- * 
+ *
  * This macro does not affect the conversion of the inputs and outputs
  * of the cipher. See the CONVERT_USING_CASTS macro for that.
  */
@@ -308,16 +307,16 @@ typedef unsigned int    Twofish_UInt32;
  *
  * Twofish operates on 32-bit words. The input to the cipher is
  * a byte array, as is the output. The portable method of doing the
- * conversion is a bunch of rotate and mask operations, but on many 
+ * conversion is a bunch of rotate and mask operations, but on many
  * platforms it can be done faster using a cast.
  * This only works if your CPU allows UInt32 accesses to arbitrary Byte
  * addresses.
- * 
+ *
  * Set to 0 to use the shift and mask operations. This is fully
  * portable. .
  *
  * Set to 1 to use a cast. The Byte * is cast to a UInt32 *, and a
- * UInt32 is read. If necessary (as indicated by the CPU_IS_BIG_ENDIAN 
+ * UInt32 is read. If necessary (as indicated by the CPU_IS_BIG_ENDIAN
  * macro) the byte order in the UInt32 is swapped. The reverse is done
  * to write the output of the encryption/decryption. Make sure you set
  * the CPU_IS_BIG_ENDIAN flag appropriately.
@@ -330,23 +329,23 @@ typedef unsigned int    Twofish_UInt32;
 #define CONVERT_USING_CASTS    0    /* default = 0 */
 
 
-/* 
+/*
  * Endianness switch.
  * Only relevant if SELECT_BYTE_FROM_UINT32_IN_MEMORY or
  * CONVERT_USING_CASTS is set.
  *
- * Set to 1 on a big-endian machine, and to 0 on a little-endian machine. 
+ * Set to 1 on a big-endian machine, and to 0 on a little-endian machine.
  * Twofish uses the little-endian convention (least significant byte first)
- * and big-endian machines (using most significant byte first) 
- * have to do a few conversions. 
+ * and big-endian machines (using most significant byte first)
+ * have to do a few conversions.
  *
- * CAUTION: This code has never been tested on a big-endian machine, 
+ * CAUTION: This code has never been tested on a big-endian machine,
  * because I don't have access to one. Feedback appreciated.
  */
 #define CPU_IS_BIG_ENDIAN    0
 
 
-/* 
+/*
  * Macro to reverse the order of the bytes in a UInt32.
  * Used to convert to little-endian on big-endian machines.
  * This macro is always tested, but only used in the encryption and
@@ -354,8 +353,8 @@ typedef unsigned int    Twofish_UInt32;
  * are both set. In other words: this macro is only speed-critical if
  * both these flags have been set.
  *
- * This default definition of SWAP works, but on many platforms there is a 
- * more efficient implementation. 
+ * This default definition of SWAP works, but on many platforms there is a
+ * more efficient implementation.
  */
 #define BSWAP(x) ((ROL32((x),8) & 0x00ff00ff) | (ROR32((x),8) & 0xff00ff00))
 
@@ -363,7 +362,7 @@ typedef unsigned int    Twofish_UInt32;
 /*
  * END OF PLATFORM FIXES
  * =====================
- * 
+ *
  * You should not have to touch the rest of this file.
  */
 
@@ -373,8 +372,8 @@ typedef unsigned int    Twofish_UInt32;
  * this file. I didn't want to use the names Byte and UInt32 in the
  * header file, because many programs already define them and using two
  * conventions at once can be very difficult.
- * Don't change these definitions! Change the originals 
- * in twofish.h instead. 
+ * Don't change these definitions! Change the originals
+ * in twofish.h instead.
  */
 /* A Byte must be an unsigned integer, 8 bits long. */
 typedef Twofish_Byte    Byte;
@@ -382,7 +381,7 @@ typedef Twofish_Byte    Byte;
 typedef Twofish_UInt32  UInt32;
 
 
-/* 
+/*
  * Define a macro ENDIAN_CONVERT.
  *
  * We define a macro ENDIAN_CONVERT that performs a BSWAP on big-endian
@@ -396,11 +395,11 @@ typedef Twofish_UInt32  UInt32;
 #endif
 
 
-/* 
+/*
  * Compute byte offset within a UInt32 stored in memory.
  *
  * This is only used when SELECT_BYTE_FROM_UINT32_IN_MEMORY is set.
- * 
+ *
  * The input is the byte number 0..3, 0 for least significant.
  * Note the use of sizeof() to support UInt32 types that are larger
  * than 4 bytes.
@@ -469,24 +468,24 @@ typedef Twofish_UInt32  UInt32;
 /*
  * And now, the actual Twofish implementation.
  *
- * This implementation generates all the tables during initialisation. 
- * I don't like large tables in the code, especially since they are easily 
- * damaged in the source without anyone noticing it. You need code to 
+ * This implementation generates all the tables during initialisation.
+ * I don't like large tables in the code, especially since they are easily
+ * damaged in the source without anyone noticing it. You need code to
  * generate them anyway, and this way all the code is close together.
- * Generating them in the application leads to a smaller executable 
- * (the code is smaller than the tables it generates) and a 
+ * Generating them in the application leads to a smaller executable
+ * (the code is smaller than the tables it generates) and a
  * larger static memory footprint.
  *
- * Twofish can be implemented in many ways. I have chosen to 
+ * Twofish can be implemented in many ways. I have chosen to
  * use large tables with a relatively long key setup time.
- * If you encrypt more than a few blocks of data it pays to pre-compute 
- * as much as possible. This implementation is relatively inefficient for 
+ * If you encrypt more than a few blocks of data it pays to pre-compute
+ * as much as possible. This implementation is relatively inefficient for
  * applications that need to re-key every block or so.
  */
 
-/* 
- * We start with the t-tables, directly from the Twofish definition. 
- * These are nibble-tables, but merging them and putting them two nibbles 
+/*
+ * We start with the t-tables, directly from the Twofish definition.
+ * These are nibble-tables, but merging them and putting them two nibbles
  * in one byte is more work than it is worth.
  */
 static Byte t_table[2][4][16] = {
@@ -509,12 +508,12 @@ static Byte t_table[2][4][16] = {
 #define ROR4BY1( x ) (((x)>>1) | (((x)<<3) & 0x8) )
 
 /*
- * The q-boxes are only used during the key schedule computations. 
- * These are 8->8 bit lookup tables. Some CPUs prefer to have 8->32 bit 
- * lookup tables as it is faster to load a 32-bit value than to load an 
+ * The q-boxes are only used during the key schedule computations.
+ * These are 8->8 bit lookup tables. Some CPUs prefer to have 8->32 bit
+ * lookup tables as it is faster to load a 32-bit value than to load an
  * 8-bit value and zero the rest of the register.
- * The LARGE_Q_TABLE switch allows you to choose 32-bit entries in 
- * the q-tables. Here we just define the Qtype which is used to store 
+ * The LARGE_Q_TABLE switch allows you to choose 32-bit entries in
+ * the q-tables. Here we just define the Qtype which is used to store
  * the entries of the q-tables.
  */
 #if LARGE_Q_TABLE
@@ -523,8 +522,8 @@ typedef UInt32      Qtype;
 typedef Byte        Qtype;
 #endif
 
-/* 
- * The actual q-box tables. 
+/*
+ * The actual q-box tables.
  * There are two q-boxes, each having 256 entries.
  */
 static Qtype q_table[2][256];
@@ -543,9 +542,9 @@ static void make_q_table( Byte t[4][16], Qtype q[256] )
     int i;
     /* Loop over all input values and compute the q-box result. */
     for( i=0; i<256; i++ ) {
-        /* 
-         * This is straight from the Twofish specifications. 
-         * 
+        /*
+         * This is straight from the Twofish specifications.
+         *
          * The ae variable is used for the a_i values from the specs
          * with even i, and ao for the odd i's. Similarly for the b's.
          */
@@ -561,8 +560,8 @@ static void make_q_table( Byte t[4][16], Qtype q[256] )
     }
 
 
-/* 
- * Initialise both q-box tables. 
+/*
+ * Initialise both q-box tables.
  */
 static void initialise_q_boxes() {
     /* Initialise each of the q-boxes using the t-tables */
@@ -577,14 +576,14 @@ static void initialise_q_boxes() {
  * GF(2)[x]/p(x) with p(x)=x^8+x^6+x^5+x^3+1.
  * If you don't understand this, read a book on finite fields. You cannot
  * follow the finite-field computations without some background.
- * 
- * In this field, multiplication by x is easy: shift left one bit 
- * and if bit 8 is set then xor the result with 0x169. 
+ *
+ * In this field, multiplication by x is easy: shift left one bit
+ * and if bit 8 is set then xor the result with 0x169.
  *
  * The MDS coefficients use a multiplication by 1/x,
  * or rather a division by x. This is easy too: first make the
- * value 'even' (i.e. bit 0 is zero) by xorring with 0x169 if necessary, 
- * and then shift right one position. 
+ * value 'even' (i.e. bit 0 is zero) by xorring with 0x169 if necessary,
+ * and then shift right one position.
  * Even easier: shift right and xor with 0xb4 if the lsbit was set.
  *
  * The MDS coefficients are 1, EF, and 5B, and we use the fact that
@@ -596,7 +595,7 @@ static void initialise_q_boxes() {
  * this implementation technique to be used.
  *
  * We have four MDS tables, each mapping 8 bits to 32 bits.
- * Each table performs one column of the matrix multiplication. 
+ * Each table performs one column of the matrix multiplication.
  * As the MDS is always preceded by q-boxes, each of these tables
  * also implements the q-box just previous to that column.
  */
@@ -616,7 +615,7 @@ static void initialise_mds_tables()
     /* Loop over all 8-bit input values */
     for( i=0; i<256; i++ )
         {
-        /* 
+        /*
          * To save some work during the key expansion we include the last
          * of the q-box layers from the h() function in these MDS tables.
          */
@@ -624,26 +623,26 @@ static void initialise_mds_tables()
         /* We first do the inputs that are mapped through the q0 table. */
         q = q_table[0][i];
         /*
-         * Here we divide by x, note the table to get 0xb4 only if the 
-         * lsbit is set. 
+         * Here we divide by x, note the table to get 0xb4 only if the
+         * lsbit is set.
          * This sets qef = (1/x)*q in the finite field
          */
         qef = (q >> 1) ^ mds_poly_divx_const[ q & 1 ];
         /*
-         * Divide by x again, and add q to get (1+1/x^2)*q. 
+         * Divide by x again, and add q to get (1+1/x^2)*q.
          * Note that (1+1/x^2) =  5B in the field, and addition in the field
          * is exclusive or on the bits.
          */
         q5b = (qef >> 1) ^ mds_poly_divx_const[ qef & 1 ] ^ q;
-        /* 
+        /*
          * Add q5b to qef to set qef = (1+1/x+1/x^2)*q.
          * Again, (1+1/x+1/x^2) = EF in the field.
          */
         qef ^= q5b;
 
-        /* 
-         * Now that we have q5b = 5B * q and qef = EF * q 
-         * we can fill two of the entries in the MDS matrix table. 
+        /*
+         * Now that we have q5b = 5B * q and qef = EF * q
+         * we can fill two of the entries in the MDS matrix table.
          * See the Twofish specifications for the order of the constants.
          */
         MDS_table[1][i] = q  <<24 | q5b<<16 | qef<<8 | qef;
@@ -663,8 +662,8 @@ static void initialise_mds_tables()
 
 
 /*
- * The h() function is the heart of the Twofish cipher. 
- * It is a complicated sequence of q-box lookups, key material xors, 
+ * The h() function is the heart of the Twofish cipher.
+ * It is a complicated sequence of q-box lookups, key material xors,
  * and finally the MDS matrix.
  * We use lots of macros to make this reasonably fast.
  */
@@ -676,10 +675,10 @@ static void initialise_mds_tables()
 /*
  * Each macro computes one column of the h for either 2, 3, or 4 stages.
  * As there are 4 columns, we have 12 macros in all.
- * 
- * The key bytes are stored in the Byte array L at offset 
+ *
+ * The key bytes are stored in the Byte array L at offset
  * 0,1,2,3,  8,9,10,11,  [16,17,18,19,   [24,25,26,27]] as this is the
- * order we get the bytes from the user. If you look at the Twofish 
+ * order we get the bytes from the user. If you look at the Twofish
  * specs, you'll see that h() is applied to the even key words or the
  * odd key words. The bytes of the even words appear in this spacing,
  * and those of the odd key words too.
@@ -701,7 +700,7 @@ static void initialise_mds_tables()
 #define H34( y, L )  H33( q1[y]^L[27], L )
 
 /*
- * Now we can define the h() function given an array of key bytes. 
+ * Now we can define the h() function given an array of key bytes.
  * This function is only used in the key schedule, and not to pre-compute
  * the keyed S-boxes.
  *
@@ -710,7 +709,7 @@ static void initialise_mds_tables()
  *
  * Arguments:
  * k        input to the h() function.
- * L        pointer to array of key bytes at 
+ * L        pointer to array of key bytes at
  *          offsets 0,1,2,3, ... 8,9,10,11, [16,17,18,19, [24,25,26,27]]
  * kCycles  # key cycles, 2, 3, or 4.
  */
@@ -810,9 +809,9 @@ void Twofish_initialise()
 /*
  * The Twofish key schedule uses an Reed-Solomon code matrix multiply.
  * Just like the MDS matrix, the RS-matrix is designed to be easy
- * to implement. Details are below in the code. 
+ * to implement. Details are below in the code.
  *
- * These constants make it easy to compute in the finite field used 
+ * These constants make it easy to compute in the finite field used
  * for the RS code.
  *
  * We use Bytes for the RS computation, but these are automatically
@@ -825,31 +824,31 @@ static unsigned int rs_poly_div_const[] = {0, 0xa6 };
 
 /*
  * Prepare a key for use in encryption and decryption.
- * Like most block ciphers, Twofish allows the key schedule 
- * to be pre-computed given only the key. 
- * Twofish has a fairly 'heavy' key schedule that takes a lot of time 
- * to compute. The main work is pre-computing the S-boxes used in the 
- * encryption and decryption. We feel that this makes the cipher much 
- * harder to attack. The attacker doesn't even know what the S-boxes 
- * contain without including the entire key schedule in the analysis. 
+ * Like most block ciphers, Twofish allows the key schedule
+ * to be pre-computed given only the key.
+ * Twofish has a fairly 'heavy' key schedule that takes a lot of time
+ * to compute. The main work is pre-computing the S-boxes used in the
+ * encryption and decryption. We feel that this makes the cipher much
+ * harder to attack. The attacker doesn't even know what the S-boxes
+ * contain without including the entire key schedule in the analysis.
  *
  * Unlike most Twofish implementations, this one allows any key size from
- * 0 to 32 bytes. Odd key sizes are defined for Twofish (see the 
- * specifications); the key is simply padded with zeroes to the next real 
+ * 0 to 32 bytes. Odd key sizes are defined for Twofish (see the
+ * specifications); the key is simply padded with zeroes to the next real
  * key size of 16, 24, or 32 bytes.
  * Each odd-sized key is thus equivalent to a single normal-sized key.
  *
  * Arguments:
  * key      array of key bytes
  * key_len  number of bytes in the key, must be in the range 0,...,32.
- * xkey     Pointer to an Twofish_key structure that will be filled 
+ * xkey     Pointer to an Twofish_key structure that will be filled
  *             with the internal form of the cipher key.
  */
 
 int twofish_prepare_key(struct twofish_subkeys *xkey,
 			const unsigned char *key, unsigned int bits)
     {
-    /* We use a single array to store all key material in, 
+    /* We use a single array to store all key material in,
      * to simplify the wiping of the key material at the end.
      * The first 32 bytes contain the actual (padded) cipher key.
      * The next 32 bytes contain the S-vector in its weird format,
@@ -878,15 +877,15 @@ int twofish_prepare_key(struct twofish_subkeys *xkey,
     /* Check for valid key length. */
     if( key_len < 0 || key_len > 32 )
         {
-        /* 
+        /*
          * This can only happen if a programmer didn't read the limitations
-         * on the key size. 
+         * on the key size.
          */
         Twofish_fatal( "Twofish_prepare_key: illegal key length" );
-        /* 
+        /*
          * A return statement just in case the fatal macro returns.
          * The rest of the code assumes that key_len is in range, and would
-         * buffer-overflow if it wasn't. 
+         * buffer-overflow if it wasn't.
          *
          * Why do we still use a programming language that has problems like
          * buffer overflows, when these problems were solved in 1960 with
@@ -899,8 +898,8 @@ int twofish_prepare_key(struct twofish_subkeys *xkey,
     memcpy( K, key, key_len );
     memset( K+key_len, 0, sizeof(K)-key_len );
 
-    /* 
-     * Compute kCycles: the number of key cycles used in the cipher. 
+    /*
+     * Compute kCycles: the number of key cycles used in the cipher.
      * 2 for 128-bit keys, 3 for 192-bit keys, and 4 for 256-bit keys.
      */
     kCycles = (key_len + 7) >> 3;
@@ -910,19 +909,19 @@ int twofish_prepare_key(struct twofish_subkeys *xkey,
         kCycles = 2;
         }
 
-    /* 
-     * From now on we just pretend to have 8*kCycles bytes of 
-     * key material in K. This handles all the key size cases. 
+    /*
+     * From now on we just pretend to have 8*kCycles bytes of
+     * key material in K. This handles all the key size cases.
      */
 
-    /* 
-     * We first compute the 40 expanded key words, 
+    /*
+     * We first compute the 40 expanded key words,
      * formulas straight from the Twofish specifications.
      */
     for( i=0; i<40; i+=2 )
         {
-        /* 
-         * Due to the byte spacing expected by the h() function 
+        /*
+         * Due to the byte spacing expected by the h() function
          * we can pick the bytes directly from the key K.
          * As we use bytes, we never have the little/big endian
          * problem.
@@ -945,43 +944,43 @@ int twofish_prepare_key(struct twofish_subkeys *xkey,
     /* Wipe variables that contained key material. */
     A=B=0;
 
-    /* 
+    /*
      * And now the dreaded RS multiplication that few seem to understand.
      * The RS matrix is not random, and is specially designed to compute the
      * RS matrix multiplication in a simple way.
      *
      * We work in the field GF(2)[x]/x^8+x^6+x^3+x^2+1. Note that this is a
-     * different field than used for the MDS matrix. 
-     * (At least, it is a different representation because all GF(2^8) 
+     * different field than used for the MDS matrix.
+     * (At least, it is a different representation because all GF(2^8)
      * representations are equivalent in some form.)
-     * 
-     * We take 8 consecutive bytes of the key and interpret them as 
-     * a polynomial k_0 + k_1 y + k_2 y^2 + ... + k_7 y^7 where 
+     *
+     * We take 8 consecutive bytes of the key and interpret them as
+     * a polynomial k_0 + k_1 y + k_2 y^2 + ... + k_7 y^7 where
      * the k_i bytes are the key bytes and are elements of the finite field.
      * We multiply this polynomial by y^4 and reduce it modulo
-     *     y^4 + (x + 1/x)y^3 + (x)y^2 + (x + 1/x)y + 1. 
+     *     y^4 + (x + 1/x)y^3 + (x)y^2 + (x + 1/x)y + 1.
      * using straightforward polynomial modulo reduction.
      * The coefficients of the result are the result of the RS
-     * matrix multiplication. When we wrote the Twofish specification, 
-     * the original RS definition used the polynomials, 
-     * but that requires much more mathematical knowledge. 
-     * We were already using matrix multiplication in a finite field for 
-     * the MDS matrix, so I re-wrote the RS operation as a matrix 
-     * multiplication to reduce the difficulty of understanding it. 
+     * matrix multiplication. When we wrote the Twofish specification,
+     * the original RS definition used the polynomials,
+     * but that requires much more mathematical knowledge.
+     * We were already using matrix multiplication in a finite field for
+     * the MDS matrix, so I re-wrote the RS operation as a matrix
+     * multiplication to reduce the difficulty of understanding it.
      * Some implementors have not picked up on this simpler method of
      * computing the RS operation, even though it is mentioned in the
      * specifications.
      *
-     * It is possible to perform these computations faster by using 32-bit 
+     * It is possible to perform these computations faster by using 32-bit
      * word operations, but that is not portable and this is not a speed-
      * critical area.
      *
-     * We explained the 1/x computation when we did the MDS matrix. 
+     * We explained the 1/x computation when we did the MDS matrix.
      *
      * The S vector is stored in K[32..64].
      * The S vector has to be reversed, so we loop cross-wise.
      *
-     * Note the weird byte spacing of the S-vector, to match the even 
+     * Note the weird byte spacing of the S-vector, to match the even
      * or odd key words arrays. See the discussion at the Hxx macros for
      * details.
      */
@@ -992,7 +991,7 @@ int twofish_prepare_key(struct twofish_subkeys *xkey,
     while( kptr > K )
         {
         kptr -= 8;
-        /* 
+        /*
          * Initialise the polynimial in sptr[0..12]
          * The first four coefficients are 0 as we have to multiply by y^4.
          * The next 8 coefficients are from the key material.
@@ -1000,7 +999,7 @@ int twofish_prepare_key(struct twofish_subkeys *xkey,
         memset( sptr, 0, 4 );
         memcpy( sptr+4, kptr, 8 );
 
-        /* 
+        /*
          * The 12 bytes starting at sptr are now the coefficients of
          * the polynomial we need to reduce.
          */
@@ -1013,23 +1012,23 @@ int twofish_prepare_key(struct twofish_subkeys *xkey,
             /* Pick up the highest coefficient of the poly. */
             b = *t;
 
-            /* 
-             * Compute x and (x+1/x) times this coefficient. 
-             * See the MDS matrix implementation for a discussion of 
-             * multiplication by x and 1/x. We just use different 
-             * constants here as we are in a 
+            /*
+             * Compute x and (x+1/x) times this coefficient.
+             * See the MDS matrix implementation for a discussion of
+             * multiplication by x and 1/x. We just use different
+             * constants here as we are in a
              * different finite field representation.
              *
-             * These two statements set 
-             * bx = (x) * b 
+             * These two statements set
+             * bx = (x) * b
              * bxx= (x + 1/x) * b
              */
             bx = (Byte)((b<<1) ^ rs_poly_const[ b>>7 ]);
             bxx= (Byte)((b>>1) ^ rs_poly_div_const[ b&1 ] ^ bx);
 
             /*
-             * Subtract suitable multiple of 
-             * y^4 + (x + 1/x)y^3 + (x)y^2 + (x + 1/x)y + 1 
+             * Subtract suitable multiple of
+             * y^4 + (x + 1/x)y^3 + (x)y^2 + (x + 1/x)y + 1
              * from the polynomial, except that we don't bother
              * updating t[0] as it will become zero anyway.
              */
@@ -1096,7 +1095,7 @@ void twofish_wipe_key(struct twofish_subkeys *subkeys)
 
 /*
  * A single round of Twofish. The A,B,C,D are the four state variables,
- * T0 and T1 are temporaries, xkey is the expanded key, and r the 
+ * T0 and T1 are temporaries, xkey is the expanded key, and r the
  * round number.
  *
  * Note that this macro does not implement the swap at the end of the round.
@@ -1108,7 +1107,7 @@ void twofish_wipe_key(struct twofish_subkeys *subkeys)
 
 /*
  * Encrypt a single cycle, consisting of two rounds.
- * This avoids the swapping of the two halves. 
+ * This avoids the swapping of the two halves.
  * Parameter r is now the cycle number.
  */
 #define ENCRYPT_CYCLE( A, B, C, D, T0, T1, xkey, r ) \
@@ -1136,8 +1135,8 @@ void twofish_wipe_key(struct twofish_subkeys *subkeys)
     D ^= T0+2*T1+xkey->K[8+2*(r)+1]; D = ROR32(D,1)
 
 /*
- * Decrypt a single cycle, consisting of two rounds. 
- * This avoids the swapping of the two halves. 
+ * Decrypt a single cycle, consisting of two rounds.
+ * This avoids the swapping of the two halves.
  * Parameter r is now the cycle number.
  */
 #define DECRYPT_CYCLE( A, B, C, D, T0, T1, xkey, r ) \
@@ -1157,7 +1156,7 @@ void twofish_wipe_key(struct twofish_subkeys *subkeys)
 
 /*
  * A macro to read the state from the plaintext and do the initial key xors.
- * The koff argument allows us to use the same macro 
+ * The koff argument allows us to use the same macro
  * for the decryption which uses different key words at the start.
  */
 #define GET_INPUT( src, A,B,C,D, xkey, koff ) \
@@ -1166,7 +1165,7 @@ void twofish_wipe_key(struct twofish_subkeys *subkeys)
 
 /*
  * Similar macro to put the ciphertext in the output buffer.
- * We xor the keys into the state variables before we use the PUT32 
+ * We xor the keys into the state variables before we use the PUT32
  * macro as the macro might use its argument multiple times.
  */
 #define PUT_OUTPUT( A,B,C,D, dst, xkey, koff ) \
