@@ -1,3 +1,15 @@
+/*
+ * This file is part of Libalgo.
+ *
+ * Copyright (c) 2021 by Vlasta Vesely.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted under the terms of the GPL-2 license.
+ * The full text of the license is included with the source code
+ * of Kuzcrypt.
+ *
+ * There's ABSOLUTELY NO WARRANTY, express or implied.
+ */
 #ifndef __SERPENT_H
 #define __SERPENT_H
 
