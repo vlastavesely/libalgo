@@ -1,4 +1,5 @@
 *.so
+*.so.*
 /tests/test
 *.o
 *.d

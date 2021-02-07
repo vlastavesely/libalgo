@@ -1,99 +1,120 @@
-CC = gcc
-RM = rm -f
-CFLAGS  = @CFLAGS@ -Wall -Ofast -fPIC
-LIBS    = @LIBS@
+NAME    = @PACKAGE_NAME@
+VERSION = @PACKAGE_VERSION@
 
-LIBNAME = algo
-LIB     = lib$(LIBNAME).so
+VERSION_FULL  = $(VERSION)
+VERSION_MAJOR = $(firstword $(subst ., ,$(VERSION)))
 
-BLOCK_CIPHERS = rijndael-alg-fst.o twofish-ferguson.o serpent.o
-STREAM_CIPHERS = arcfour.o chacha20.o
-HASHES = sha1.o sha256.o sha512.o whirlpool.o
-HMACS = hmac-sha1.o hmac-sha256.o hmac-sha512.o hmac-whirlpool.o
+PROGNAME = $(NAME)
+TESTPROG = tests/test
+LINKNAME = lib$(NAME).so
+SONAME   = lib$(NAME).so.$(VERSION_MAJOR)
+REALNAME = lib$(NAME).so.$(VERSION_FULL)
+LIBFILES = $(LINKNAME) $(SONAME) $(REALNAME)
 
-OBJECTS = $(BLOCK_CIPHERS) $(STREAM_CIPHERS) $(HASHES) $(HMACS)
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
-USE_AES_NI = @USE_AES_NI@
-ifeq ($(USE_AES_NI),yes)
-	OBJECTS += aes-ni.o
-endif
-
-HEADERS = $(OBJECTS:%.o=%.h)
-
-TEST_PROG    = tests/test
-TEST_OBJECTS = tests/main.o tests/utils.o $(OBJECTS:%.o=tests/%.o)
-TEST_CFLAGS  = $(CFLAGS) $(shell pkg-config --cflags check)
-TEST_LIBS    = $(LIBS) $(shell pkg-config --libs check)
-
-INSTALL = @INSTALL@
-INSTALL_DATA = @INSTALL_DATA@
-MKDIR_P = @MKDIR_P@
+CC              = @CC@
+INSTALL         = @INSTALL@
+INSTALL_DATA    = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+MKDIR_P         = @MKDIR_P@
+LN_S            = @LN_S@
 
 prefix       = @prefix@
 exec_prefix  = @exec_prefix@
-datarootdir  = @datarootdir@
 libdir       = @libdir@
-incdir       = @includedir@
+includedir   = @includedir@
+datarootdir  = @datarootdir@
+docdir       = @docdir@
 pkgconfigdir = @pkgconfigdir@
+
+CFLAGS      = -fPIC @CFLAGS@
+TEST_CFLAGS = @CFLAGS@ @CHECK_CFLAGS@
+
+LIB_LFLAGS  = -shared -Wl,-soname,$(SONAME)
+PROG_LFLAGS = -L. -l$(NAME)
+TEST_LFLAGS = -L. -l$(NAME) @CHECK_LIBS@
+
+LIB_OBJECTS =								\
+	rijndael-alg-fst.o twofish-ferguson.o serpent.o arcfour.o	\
+	chacha20.o sha1.o sha256.o sha512.o whirlpool.o hmac-sha1.o	\
+	hmac-sha256.o hmac-sha512.o hmac-whirlpool.o
+
+USE_AES_NI = @USE_AES_NI@
+ifeq ($(USE_AES_NI),yes)
+	LIB_OBJECTS += aes-ni.o
+endif
+
+TEST_OBJECTS =								\
+	$(patsubst %, tests/%, $(LIB_OBJECTS))				\
+	tests/main.o tests/utils.o
+
+AUX_FILES =								\
+	Makefile configure configure.scan autom4te.cache autoscan.log	\
+	aclocal.m4 config.log config.status config.guess config.sub	\
+	config.h config.h.in config.h.in~ install-sh
+
+PUBLIC_HEADERS = $(LIB_OBJECTS:%.o=%.h)
+
+
+all:
+
+include $(wildcard *.d)
+
+all: $(LIBFILES) $(TESTPROG)
+
+$(REALNAME): $(LIB_OBJECTS)
+	$(QUIET_LD) $(CC) $(LIB_OBJECTS) -o $@ $(LIB_LFLAGS)
+
+$(SONAME): $(REALNAME)
+	$(QUIET_LN) $(LN_S) -f $< $@
+
+$(LINKNAME): $(SONAME)
+	$(QUIET_LN) $(LN_S) -f $< $@
+
+%.o: %.c
+	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(CFLAGS)
+
+tests/%.o: tests/%.c
+	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(TEST_CFLAGS)
+
+test: $(TESTPROG)
+	LD_LIBRARY_PATH=$$(pwd) $(TESTPROG)
+
+$(TESTPROG): $(LIBFILES) $(TEST_OBJECTS)
+	$(QUIET_LD) $(CC) $(TEST_OBJECTS) -o $@ $(TEST_LFLAGS)
+
+install-libalgo:
+	$(MKDIR_P) $(libdir)
+	$(INSTALL_DATA) $(LIBFILES) $(libdir)
+
+install-libalgo-dev:
+	$(MKDIR_P) $(includedir)/algo $(pkgconfigdir)
+	$(INSTALL_DATA) $(PUBLIC_HEADERS) $(includedir)/algo
+	$(INSTALL_DATA) libalgo.pc $(pkgconfigdir)
+
+uninstall-libalgo:
+	$(RM) $(libdir)/$(LIBFILE)*
+
+uninstall-libalgo-dev:
+	$(RM) -r $(includedir)/algo
+	$(RM) $(pkgconfigdir)/libalgo.pc
+
+clean:
+	$(RM) $(LIBFILES) lib$(NAME).pc
+	$(RM) -r $(TESTPROG) *.gcda *.gcno
+	$(RM) *.o */*.o */*.d *.d
+
+clean-aux:
+	$(RM) -r $(AUX_FILES)
+
+distclean: clean clean-aux
 
 
 ifndef V
-QUIET_CC    = @echo "   CC    $@";
-QUIET_LD    = @echo "   LINK  $@";
-QUIET_GEN   = @echo "   GEN   $@";
+QUIET_CC    = @echo "  CC     $@";
+QUIET_LD    = @echo "  CCLD   $@";
+QUIET_GEN   = @echo "  GEN    $@";
+QUIET_AR    = @echo "  AR     $@";
+QUIET_LN    = @echo "  LN     $@";
 endif
-
-
-.PHONY: all test clean
-
-all: $(LIB)
-
-include $(wildcard *.d tests/*.d)
-
-$(LIB): $(OBJECTS)
-	$(QUIET_LD) $(CC) -MMD -MP -shared $^ -o $@ $(CFLAGS) $(LIBS)
-
-%.o: %.c
-	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(CFLAGS) $(LIBS)
-
-test: $(TEST_PROG)
-	LD_LIBRARY_PATH=$$(pwd) $(TEST_PROG)
-
-.PHONY: install install-libalgo install-libalgo-dev
-
-install: install-libalgo install-libalgo-dev
-
-install-libalgo: all
-	$(MKDIR_P) $(libdir)
-	$(INSTALL_DATA) $(LIB) $(libdir)
-
-install-libalgo-dev:
-	$(MKDIR_P) $(incdir)/algo $(pkgconfigdir)
-	$(INSTALL_DATA) $(HEADERS) $(incdir)/algo
-	$(INSTALL_DATA) libalgo.pc $(pkgconfigdir)
-
-.PHONY: uninstall uninstall-libalgo uninstall-libalgo-dev
-
-uninstall: uninstall-libalgo uninstall-libalgo-dev
-
-uninstall-libalgo:
-	$(RM) $(libdir)/$(LIB)
-
-uninstall-libalgo-dev:
-	$(RM) $(incdir)/algo
-	$(RM) $(pkgconfigdir)/libalgo.pc
-
-$(TEST_PROG): $(TEST_OBJECTS) $(LIB)
-	$(QUIET_LD) $(CC) -MMD -MP $(TEST_OBJECTS) -o $@ $(TEST_CFLAGS) $(TEST_LIBS) -L. -l$(LIBNAME)
-
-tests/%.o: tests/%.c
-	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(TEST_CFLAGS) $(TEST_LIBS)
-
-clean:
-	$(RM) $(TEST_PROG) *.so *.o */*.o */*.d *.d libalgo.pc
-
-distclean: clean
-	$(RM) -r autom4te.cache
-	$(RM) Makefile configure configure.scan
-	$(RM) config.h* config.log config.status
-	$(RM) aclocal.m4 install-sh
