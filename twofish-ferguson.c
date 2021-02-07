@@ -795,7 +795,7 @@ static int Twofish_initialised = 0;
  * This routine also does some sanity checks, to make sure that
  * all the macros behave, and it tests the whole cipher.
  */
-void Twofish_initialise()
+static void Twofish_initialise()
     {
     /* We can now generate our tables, in the right order of course. */
     initialise_q_boxes();
