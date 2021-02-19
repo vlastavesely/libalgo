@@ -2,6 +2,7 @@
 #include "rijndael-alg-fst.h"
 #include "twofish-ferguson.h"
 #include "serpent.h"
+#include "anubis.h"
 #include "whirlpool.h"
 #include "sha1.h"
 #include "sha256.h"
@@ -30,6 +31,7 @@ static struct Suite *create_test_suite()
 	register_rijndael_alg_fst_tests(test_case);
 	register_twofish_ferguson_tests(test_case);
 	register_serpent_tests(test_case);
+	register_anubis_tests(test_case);
 	register_whirlpool_tests(test_case);
 	register_sha1_tests(test_case);
 	register_sha256_tests(test_case);

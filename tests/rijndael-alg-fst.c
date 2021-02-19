@@ -37,6 +37,7 @@ START_TEST(test_rijndael_256)
 	test_rijndael(key_256, ciphertext_256, 256);
 }
 END_TEST
+
 void register_rijndael_alg_fst_tests(struct TCase *test_case)
 {
 	tcase_add_test(test_case, test_rijndael_128);
