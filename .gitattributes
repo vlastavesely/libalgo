@@ -4,3 +4,4 @@ serpent.c linguist-vendored
 whirlpool.c linguist-vendored
 sha1.c linguist-vendored
 anubis.c linguist-vendored
+blowfish.c linguist-vendored
