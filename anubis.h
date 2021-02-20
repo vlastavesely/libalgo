@@ -25,7 +25,7 @@ struct anubis_subkeys {
 };
 
 int anubis_prepare_key(struct anubis_subkeys *subkeys,
-		       const unsigned char *key, unsigned int keylen);
+		       const unsigned char *key, unsigned int keybits);
 void anubis_encrypt(struct anubis_subkeys *subkeys, unsigned char *out,
 		    const unsigned char *in);
 void anubis_decrypt(struct anubis_subkeys *subkeys, unsigned char *out,

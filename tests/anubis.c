@@ -80,7 +80,7 @@ static void test_anubis(const char *key, const unsigned char *pt,
  	struct anubis_subkeys subkeys;
 	unsigned char buf[16];
 
-	anubis_prepare_key(&subkeys, key, bits >> 3);
+	anubis_prepare_key(&subkeys, key, bits);
 	anubis_encrypt(&subkeys, buf, pt);
 	ck_assert_byte_array_eq(ct, buf, 16);
 

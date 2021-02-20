@@ -468,13 +468,13 @@ static const unsigned int rc[] = {
 };
 
 int anubis_prepare_key(struct anubis_subkeys *structpointer,
-		       const unsigned char *key, unsigned int keylen)
+		       const unsigned char *key, unsigned int keybits)
 {
 	int N, R, i, pos, r;
 	u32 kappa[ANUBIS_MAX_N];
 	u32 inter[ANUBIS_MAX_N];
 
-	structpointer->keyBits = keylen * 8;
+	structpointer->keyBits = keybits;
 
 	/*
 	 * determine the N length parameter:
