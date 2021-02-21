@@ -474,11 +474,18 @@ int anubis_prepare_key(struct anubis_subkeys *structpointer,
 	u32 kappa[ANUBIS_MAX_N];
 	u32 inter[ANUBIS_MAX_N];
 
+	switch (keybits) {
+	case 128: case 160: case 192: case 224:
+	case 256: case 288: case 320:
+		break;
+	default:
+		return -1;
+	}
+
 	structpointer->keyBits = keybits;
 
 	/*
 	 * determine the N length parameter:
-	 * (N.B. it is assumed that the key length is valid!)
 	 */
 	N = structpointer->keyBits >> 5;
 
@@ -574,6 +581,8 @@ int anubis_prepare_key(struct anubis_subkeys *structpointer,
 				T3[T4[(v      ) & 0xff] & 0xff];
 		}
 	}
+
+	return 0;
 }
 
 static void anubis_crypt(unsigned int roundKey[ANUBIS_MAX_ROUNDS + 1][4],
