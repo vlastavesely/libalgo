@@ -5,8 +5,10 @@
 #include <check.h>
 
 #define ck_assert_byte_array_eq(a, b, n)	{	\
+	const unsigned char *aa = a;			\
+	const unsigned char *bb = b;			\
 	for (int ii = 0; ii < n; ii++) {		\
-		ck_assert_int_eq(a[ii], b[ii]);		\
+		ck_assert_int_eq(aa[ii], bb[ii]);	\
 	}						\
 }
 
