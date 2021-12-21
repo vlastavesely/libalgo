@@ -28,6 +28,17 @@
 	((uint64_t) (a)[7])         \
 )
 
+#define GETU64_LE(a) ( \
+	((uint64_t) (a)[7] << 56) | \
+	((uint64_t) (a)[6] << 48) | \
+	((uint64_t) (a)[5] << 40) | \
+	((uint64_t) (a)[4] << 32) | \
+	((uint64_t) (a)[3] << 24) | \
+	((uint64_t) (a)[2] << 16) | \
+	((uint64_t) (a)[1] <<  8) | \
+	((uint64_t) (a)[0])         \
+)
+
 #define PUTU64_BE(a, i) { \
 	(a)[0] = (unsigned char) ((i) >> 56); \
 	(a)[1] = (unsigned char) ((i) >> 48); \
@@ -39,9 +50,20 @@
 	(a)[7] = (unsigned char) ((i));       \
 }
 
+#define PUTU64_LE(a, i) { \
+	(a)[7] = (unsigned char) ((i) >> 56); \
+	(a)[6] = (unsigned char) ((i) >> 48); \
+	(a)[5] = (unsigned char) ((i) >> 40); \
+	(a)[4] = (unsigned char) ((i) >> 32); \
+	(a)[3] = (unsigned char) ((i) >> 24); \
+	(a)[2] = (unsigned char) ((i) >> 16); \
+	(a)[1] = (unsigned char) ((i) >>  8); \
+	(a)[0] = (unsigned char) ((i));       \
+}
+
 #define ROTR32(v, n)	(((v) >> n) | ((v) << (32 - n)))
 #define ROTL32(v, n)	(((v) << n) | ((v) >> (32 - n)))
-#define ROTR64(v, n)	((v >> n) | (v << (64 - n)))
+#define ROTR64(v, n)	(((v) >> n) | ((v) << (64 - n)))
 
 /*
  * Byte-order swap functions for conversion from big-endian to little-endian

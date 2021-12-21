@@ -8,6 +8,7 @@
 #include "sha1.h"
 #include "sha256.h"
 #include "sha512.h"
+#include "blake2b.h"
 #include "chacha20.h"
 #include "salsa20.h"
 #include "arcfour.h"
@@ -39,6 +40,7 @@ static struct Suite *create_test_suite()
 	register_sha1_tests(test_case);
 	register_sha256_tests(test_case);
 	register_sha512_tests(test_case);
+	register_blake2b_tests(test_case);
 	register_chacha20_tests(test_case);
 	register_salsa20_tests(test_case);
 	register_arcfour_tests(test_case);
