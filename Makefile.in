@@ -60,7 +60,7 @@ PUBLIC_HEADERS = $(LIB_OBJECTS:%.o=%.h)
 
 all:
 
-include $(wildcard *.d)
+include $(wildcard *.d tests/*.d)
 
 all: $(LIBFILES) $(TESTPROG)
 
@@ -87,12 +87,13 @@ $(TESTPROG): $(LIBFILES) $(TEST_OBJECTS)
 
 install-libalgo:
 	$(MKDIR_P) $(libdir)
-	$(INSTALL_DATA) $(LIBFILES) $(libdir)
+	cp -P $(REALNAME) $(SONAME) $(libdir)
 
 install-libalgo-dev:
 	$(MKDIR_P) $(includedir)/algo $(pkgconfigdir)
 	$(INSTALL_DATA) $(PUBLIC_HEADERS) $(includedir)/algo
 	$(INSTALL_DATA) libalgo.pc $(pkgconfigdir)
+	cp -P $(LINKNAME) $(libdir)
 
 uninstall-libalgo:
 	$(RM) $(libdir)/$(LIBFILE)*
