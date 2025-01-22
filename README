@@ -1,0 +1,50 @@
+Libalgo - Cryptographic Library
+═══════════════════════════════
+LibAlgo is an open-source C library offering a comprehensive suite
+of low-level implementations of cryptographic algorithms. Distributed
+under the GPLv2 licence, it is designed to provide robust, efficient,
+and optimised implementations for a variety of cryptographic needs.
+
+LibAlgo includes a well-tested collection of cipher algorithms, hash
+functions, and HMAC implementations to meet modern security requirements.
+
+
+Block ciphers
+┈┈┈┈┈┈┈┈┈┈┈┈┈
+  • AES and AES-NI (hardware-accelerated AES)
+  • Anubis
+  • Blowfish
+  • Serpent
+  • Twofish
+
+Stream ciphers
+┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+  • ChaCha20 and Salsa20
+  • ARCFOUR
+
+Hash Functions
+┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+  • BLAKE2b
+  • SHA-1
+  • SHA-256 and SHA-512
+  • Whirlpool
+
+HMAC Implementations
+┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+  • HMAC-BLAKE2b
+  • HMAC-SHA-1
+  • HMAC-SHA-256 and HMAC-SHA-512
+  • HMAC-Whirlpool
+
+
+Licensing Notice
+────────────────
+This software is released under the terms of the GPL license version 2 as
+published by the Free Software Foundation. You can freely redistribute and/or
+modify the software under the terms of the license.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+For more information on details of the license, see the file COPYING.
