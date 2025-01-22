@@ -16,6 +16,7 @@
 #include "hmac-sha1.h"
 #include "hmac-sha256.h"
 #include "hmac-sha512.h"
+#include "hmac-blake2b.h"
 #include "utils.h"
 
 #ifdef HAVE_AES_INSTRUCTIONS
@@ -48,6 +49,7 @@ static struct Suite *create_test_suite()
 	register_hmac_sha1_tests(test_case);
 	register_hmac_sha256_tests(test_case);
 	register_hmac_sha512_tests(test_case);
+	register_hmac_blake2b_tests(test_case);
 	register_utils_tests(test_case);
 
 	#ifdef HAVE_AES_INSTRUCTIONS

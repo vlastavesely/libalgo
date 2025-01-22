@@ -1,6 +1,16 @@
 #ifndef __HMAC_H
 #define __HMAC_H
 
+#ifdef KEYED_HASH
+  /*
+   * some functions, like Blake2B use optional key which is, nevertheless,
+   * not used with HMAC.
+   */
+  #define HMAC_INIT_FUNC(ALGO, state) ALGO##_init(state, NULL, 0)
+#else
+  #define HMAC_INIT_FUNC(ALGO, state) ALGO##_init(state)
+#endif
+
 #define HMAC_INIT(ALGO, STATELEN)					\
 	void hmac_##ALGO##_init(struct hmac_##ALGO##_state *s, 		\
 			const unsigned char *k, unsigned int keylen) {	\
@@ -8,7 +18,7 @@
 		unsigned int i;						\
 									\
 		if (keylen > STATELEN) {				\
-			ALGO##_init(&(s->state));			\
+			HMAC_INIT_FUNC(ALGO, &(s->state));		\
 			ALGO##_update(&(s->state), k, keylen);		\
 			ALGO##_final(&(s->state), buf);			\
 		} else {						\
@@ -20,7 +30,7 @@
 			s->opad[i] = buf[i] ^ 0x5c;			\
 		}							\
 									\
-		ALGO##_init(&(s->state));				\
+		HMAC_INIT_FUNC(ALGO, &(s->state));			\
 		ALGO##_update(&(s->state), s->ipad, STATELEN);		\
 	}
 
@@ -35,7 +45,7 @@
 			unsigned char *d) {			\
 		unsigned char buf[DIGESTLEN];			\
 		ALGO##_final(&(s->state), buf);			\
-		ALGO##_init(&(s->state));			\
+		HMAC_INIT_FUNC(ALGO, &(s->state));		\
 		ALGO##_update(&(s->state), s->opad, STATELEN);	\
 		ALGO##_update(&(s->state), buf, DIGESTLEN);	\
 		ALGO##_final(&(s->state), d);			\
@@ -44,7 +54,7 @@
 #define HMAC_WIPE(ALGO, STATELEN)					\
 	void hmac_##ALGO##_wipe_state(struct hmac_##ALGO##_state *s) {	\
 		unsigned int i;						\
-		ALGO##_init(&(s->state));				\
+		HMAC_INIT_FUNC(ALGO, &(s->state));			\
 		for (i = 0; i < STATELEN; i++) {			\
 			s->ipad[i] = 0x00;				\
 			s->opad[i] = 0x00;				\
