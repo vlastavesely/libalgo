@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([algo], [0.1], [vlastavesely(at)protonmail.ch])
+AC_INIT([algo], [1.0], [vlastavesely(at)protonmail.ch])
 AC_CONFIG_SRCDIR([.])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
