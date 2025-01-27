@@ -92,6 +92,8 @@ install-libalgo:
 install-libalgo-dev:
 	$(MKDIR_P) $(includedir)/algo $(pkgconfigdir)
 	$(INSTALL_DATA) $(PUBLIC_HEADERS) $(includedir)/algo
+	$(LN_S) -f twofish-ferguson.h $(includedir)/algo/twofish.h
+	$(LN_S) -f rijndael-alg-fst.h $(includedir)/algo/aes.h
 	$(INSTALL_DATA) libalgo.pc $(pkgconfigdir)
 	cp -P $(LINKNAME) $(libdir)
 
