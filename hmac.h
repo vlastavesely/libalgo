@@ -6,7 +6,7 @@
    * some functions, like Blake2B use optional key which is, nevertheless,
    * not used with HMAC.
    */
-  #define HMAC_INIT_FUNC(ALGO, state) ALGO##_init(state, NULL, 0)
+  #define HMAC_INIT_FUNC(ALGO, state) ALGO##_init(state, NULL, 0, 64)
 #else
   #define HMAC_INIT_FUNC(ALGO, state) ALGO##_init(state)
 #endif

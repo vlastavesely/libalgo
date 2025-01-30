@@ -29,8 +29,9 @@ static inline void set_key(struct blake2b_state *state, const unsigned char *key
 {
 	memset(state->k, '\0', sizeof(state->k));
 
-	if (!key)
+	if (key == NULL) {
 		return;
+	}
 
 	memcpy(state->k, key, len);
 
@@ -40,19 +41,21 @@ static inline void set_key(struct blake2b_state *state, const unsigned char *key
 }
 
 void blake2b_init(struct blake2b_state *state, const unsigned char *key,
-		  unsigned int keylen)
+		  unsigned int keylen, unsigned int digestsize)
 {
 	unsigned int i;
 	state->len = 0;
 
 	memset(state, 0, sizeof(*state));
 
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < 8; i++) {
 		state->h[i] = iv[i];
+	}
 
-	state->h[0] ^= 0x01010000 | keylen << 8 | 64 /* digest size */;
-
+	state->h[0] ^= 0x01010000 | keylen << 8 | digestsize;
 	set_key(state, key, keylen);
+
+	state->digestsize = digestsize;
 }
 
 #define G(r, i, a, b, c, d) {			\
@@ -83,11 +86,13 @@ static void blake2b_block(struct blake2b_state *state, const unsigned char *in)
 	uint64_t m[16], v[16];
 	unsigned int i;
 
-	for (i = 0; i < 16; i++)
+	for (i = 0; i < 16; i++) {
 		m[i] = GETU64_LE(in + (8 * i));
+	}
 
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < 8; i++) {
 		v[i] = state->h[i];
+	}
 
 	v[ 8] = iv[0];
 	v[ 9] = iv[1];
@@ -111,8 +116,9 @@ static void blake2b_block(struct blake2b_state *state, const unsigned char *in)
 	ROUND(10);
 	ROUND(11);
 
-	for (i = 0; i < 8; ++i)
+	for (i = 0; i < 8; ++i) {
 		state->h[i] = state->h[i] ^ v[i] ^ v[i + 8];
+	}
 }
 
 static void blake2b_increment_counter(struct blake2b_state *state,
@@ -128,8 +134,9 @@ void blake2b_update(struct blake2b_state *state, const unsigned char *in,
 	unsigned int left = state->len;
 	unsigned int fill = 128 - left;
 
-	if (!len)
+	if (!len) {
 		return;
+	}
 
 	if (len > fill) {
 		state->len = 0;
@@ -155,18 +162,22 @@ void blake2b_update(struct blake2b_state *state, const unsigned char *in,
 
 void blake2b_final(struct blake2b_state *state, unsigned char *out)
 {
+	unsigned char blk[64];
+
 	blake2b_increment_counter(state, state->len);
 	state->f[0] = (uint64_t) -1;
 
 	memset(state->buf + state->len, 0, 128 - state->len);
 	blake2b_block(state, state->buf);
 
-	PUTU64_LE(out +  0, state->h[0]);
-	PUTU64_LE(out +  8, state->h[1]);
-	PUTU64_LE(out + 16, state->h[2]);
-	PUTU64_LE(out + 24, state->h[3]);
-	PUTU64_LE(out + 32, state->h[4]);
-	PUTU64_LE(out + 40, state->h[5]);
-	PUTU64_LE(out + 48, state->h[6]);
-	PUTU64_LE(out + 56, state->h[7]);
+	PUTU64_LE(blk +  0, state->h[0]);
+	PUTU64_LE(blk +  8, state->h[1]);
+	PUTU64_LE(blk + 16, state->h[2]);
+	PUTU64_LE(blk + 24, state->h[3]);
+	PUTU64_LE(blk + 32, state->h[4]);
+	PUTU64_LE(blk + 40, state->h[5]);
+	PUTU64_LE(blk + 48, state->h[6]);
+	PUTU64_LE(blk + 56, state->h[7]);
+
+	memcpy(out, blk, state->digestsize);
 }

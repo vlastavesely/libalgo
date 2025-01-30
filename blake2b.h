@@ -25,11 +25,12 @@ struct blake2b_state {
 	uint64_t f[2];
 	unsigned char buf[128];
 	unsigned long long len;
+	unsigned int digestsize;
 };
 
 void blake2b_init(struct blake2b_state *state, const unsigned char *key,
-		 unsigned int keylen);
-#define blake2b_wipe_state(s) blake2b_init(s, NULL, 0)
+		 unsigned int keylen, unsigned int digestsize);
+#define blake2b_wipe_state(s) blake2b_init(s, NULL, 0, 0)
 
 void blake2b_update(struct blake2b_state *state, const unsigned char *in,
 		    unsigned int n);
