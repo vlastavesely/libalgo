@@ -10,11 +10,25 @@
 	((unsigned int) (a)[3])         \
 )
 
+#define GETU32_LE(a) ( \
+	((unsigned int) (a)[0]      ) | \
+	((unsigned int) (a)[1] <<  8) | \
+	((unsigned int) (a)[2] << 16) | \
+	((unsigned int) (a)[3] << 24)   \
+)
+
 #define PUTU32_BE(a, i) {			\
 	(a)[0] = (unsigned char) ((i) >> 24);	\
 	(a)[1] = (unsigned char) ((i) >> 16);	\
 	(a)[2] = (unsigned char) ((i) >>  8);	\
 	(a)[3] = (unsigned char) ((i)); 	\
+}
+
+#define PUTU32_LE(a, i) {			\
+	(a)[0] = (unsigned char) ((i)      );	\
+	(a)[1] = (unsigned char) ((i) >>  8);	\
+	(a)[2] = (unsigned char) ((i) >> 16);	\
+	(a)[3] = (unsigned char) ((i) >> 24); 	\
 }
 
 #define GETU64_BE(a) ( \

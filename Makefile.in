@@ -39,7 +39,7 @@ LIB_OBJECTS =								\
 	rijndael-alg-fst.o twofish-ferguson.o serpent.o arcfour.o	\
 	chacha20.o sha1.o sha256.o sha512.o whirlpool.o hmac-sha1.o	\
 	hmac-sha256.o hmac-sha512.o hmac-whirlpool.o anubis.o		\
-	blowfish.o salsa20.o blake2b.o hmac-blake2b.o
+	blowfish.o salsa20.o blake2b.o hmac-blake2b.o argon2.o
 
 USE_AES_NI = @USE_AES_NI@
 ifeq ($(USE_AES_NI),yes)

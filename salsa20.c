@@ -2,13 +2,6 @@
 #include "config.h"
 #include "utils.h"
 
-#define GETU32_LE(a) ( \
-	((unsigned int)(a)[3] << 24) | \
-	((unsigned int)(a)[2] << 16) | \
-	((unsigned int)(a)[1] <<  8) | \
-	((unsigned int)(a)[0])         \
-)
-
 static const char sigma[16] = "expand 32-byte k";
 static const char tau[16] = "expand 16-byte k";
 

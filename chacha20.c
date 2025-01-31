@@ -6,13 +6,6 @@
 #include "config.h"
 #include "utils.h"
 
-#define GETU32_LE(a) ( \
-	((unsigned int)(a)[3] << 24) | \
-	((unsigned int)(a)[2] << 16) | \
-	((unsigned int)(a)[1] <<  8) | \
-	((unsigned int)(a)[0])         \
-)
-
 int chacha20_prepare_key(struct chacha20_subkeys *subkeys,
 			 const unsigned char *key, const unsigned char *nonce,
 			 unsigned int blockno)

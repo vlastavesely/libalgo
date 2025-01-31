@@ -36,6 +36,10 @@ HMAC Implementations
   • HMAC-SHA-256 and HMAC-SHA-512
   • HMAC-Whirlpool
 
+Key Derivation Functions
+┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+  • Argon2
+
 
 Licensing Notice
 ────────────────
