@@ -1,13 +1,7 @@
 #ifndef __HMAC_H
 #define __HMAC_H
 
-#ifdef KEYED_HASH
-  /*
-   * some functions, like Blake2B use optional key which is, nevertheless,
-   * not used with HMAC.
-   */
-  #define HMAC_INIT_FUNC(ALGO, state) ALGO##_init(state, NULL, 0, 64)
-#else
+#if !defined(HMAC_INIT_FUNC)
   #define HMAC_INIT_FUNC(ALGO, state) ALGO##_init(state)
 #endif
 
