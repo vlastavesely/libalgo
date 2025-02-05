@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include <math.h>
 #include "argon2.h"
 #include "blake2b.h"
@@ -318,7 +319,7 @@ static void initialise(struct argon2_state *state)
 	initialise_memory(state, h0);
 }
 
-static void fill_memory_blocks(struct argon2_state *state)
+static int fill_memory_blocks_single(struct argon2_state *state)
 {
 	unsigned int r, s, l;
 
@@ -332,6 +333,55 @@ static void fill_memory_blocks(struct argon2_state *state)
 			}
 		}
 	}
+
+	return 0;
+}
+
+struct thr_data {
+	struct argon2_state *state;
+	unsigned int r;
+	unsigned int l;
+	unsigned int s;
+};
+
+static void *fill_segment_thread(void *arg)
+{
+	struct thr_data *data = arg;
+	fill_segment(data->state, data->r, data->l, data->s);
+	return NULL;
+}
+
+static int fill_memory_blocks_threads(struct argon2_state *state)
+{
+	unsigned int p = state->p;
+	unsigned int r, s, l;
+	struct thr_data data[p];
+	pthread_t thr[p];
+	int ret;
+
+	/* round/iterations */
+	for (r = 0; r < state->i; r++) {
+		/* slices */
+		for (s = 0; s < ARGON2_SLICES; s++) {
+			/* lanes in separate threads */
+			for (l = 0; l < p; l++) {
+				data[l].state = state;
+				data[l].r = r;
+				data[l].l = l;
+				data[l].s = s;
+				ret = pthread_create(&thr[l], NULL, fill_segment_thread, &data[l]);
+				if (ret != 0) {
+					return ARGON2_THREAD_FAIL;
+				}
+			}
+
+			for (l = 0; l < p; l++) {
+				pthread_join(thr[l], NULL);
+			}
+		}
+	}
+
+	return 0;
 }
 
 static void finalise(struct argon2_state *state, unsigned char *digest)
@@ -348,7 +398,10 @@ static void finalise(struct argon2_state *state, unsigned char *digest)
 	}
 
 	hash(digest, state->t, (unsigned char *) block, 1024);
+}
 
+static void wipe_state(struct argon2_state *state)
+{
 	memset(state->memory, '\0', state->m * 1024);
 	free(state->memory);
 }
@@ -388,8 +441,15 @@ int argon2(struct argon2_state *state, unsigned char *digest)
 	}
 
 	initialise(state);
-	fill_memory_blocks(state);
-	finalise(state, digest);
 
-	return 0;
+	ret = (state->p > 1)
+		? fill_memory_blocks_threads(state)
+		: fill_memory_blocks_single(state);
+
+	if (ret == 0) {
+		finalise(state, digest);
+	}
+
+	wipe_state(state);
+	return ret;
 }

@@ -39,6 +39,7 @@ enum argon2_code {
 	ARGON2_P_TOO_LITTLE,
 	ARGON2_BAD_VERSION,
 	ARGON2_BAD_TYPE,
+	ARGON2_THREAD_FAIL,
 };
 
 struct argon2_state {
