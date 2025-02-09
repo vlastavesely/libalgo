@@ -6,6 +6,7 @@
 #include "argon2.h"
 #include "blake2b.h"
 #include "utils.h"
+#include "config.h"
 
 #define ARGON2_SLICES 4
 
@@ -115,6 +116,12 @@ static void g(uint64_t *dst, const uint64_t *x, const uint64_t *y, bool xor)
 		block_xor(tmp, tmp, dst);
 	}
 
+#if WORDS_BIGENDIAN
+	for (i = 0; i < 128; i++) {
+		r[i] = BSWAP64(r[i]);
+	}
+#endif
+
 	for (i = 0; i < 8; ++i) {
 		BLAKE2_ROUND_NOMSG(
 			r[16 * i],      r[16 * i + 1],  r[16 * i + 2],
@@ -134,6 +141,12 @@ static void g(uint64_t *dst, const uint64_t *x, const uint64_t *y, bool xor)
 			r[2 * i + 96], r[2 * i + 97], r[2 * i + 112],
 			r[2 * i + 113]);
 	}
+
+#if WORDS_BIGENDIAN
+	for (i = 0; i < 128; i++) {
+		r[i] = BSWAP64(r[i]);
+	}
+#endif
 
 	block_xor(dst, tmp, r);
 }
@@ -183,7 +196,13 @@ static uint32_t index_alpha(struct argon2_state *state, unsigned int p,
 
 static void next_addr(uint64_t *dst, uint64_t *a, uint64_t *b)
 {
+#if WORDS_BIGENDIAN
+	a[6] = BSWAP64(a[6]);
+#endif
 	a[6]++;
+#if WORDS_BIGENDIAN
+	a[6] = BSWAP64(a[6]);
+#endif
 	g(dst, b, a, false);
 	g(dst, b, dst, false);
 }
@@ -203,12 +222,21 @@ static void fill_segment(struct argon2_state *state, unsigned int r,
 	indep = (state->type == ARGON2I) || (state->type == ARGON2ID && r == 0 && s < 2);
 
 	if (indep == true) {
+	#if WORDS_BIGENDIAN
+		input[0] = BSWAP64(r);
+		input[1] = BSWAP64(l);
+		input[2] = BSWAP64(s);
+		input[3] = BSWAP64(state->m);
+		input[4] = BSWAP64(state->i);
+		input[5] = BSWAP64(state->type);
+	#else
 		input[0] = r;
 		input[1] = l;
 		input[2] = s;
 		input[3] = state->m;
 		input[4] = state->i;
 		input[5] = state->type;
+	#endif
 	}
 
 	if (r == 0 && s == 0) {
@@ -238,6 +266,10 @@ static void fill_segment(struct argon2_state *state, unsigned int r,
 		} else {
 			pseudo_rand = state->memory[prev_off * 128];
 		}
+
+		#if WORDS_BIGENDIAN
+			pseudo_rand = BSWAP64(pseudo_rand);
+		#endif
 
 		ref_lane = (pseudo_rand >> 32) % state->p;
 		if (r == 0 && s == 0) {
