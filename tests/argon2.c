@@ -71,7 +71,49 @@ START_TEST(test_argon2)
 			 "860c215c846b21e1");
 }
 END_TEST
+
+static int argon2_hash(const char *password, const char *salt,
+		       unsigned int m, unsigned int t, unsigned int p,
+		       unsigned int hlen, enum argon2_type type)
+{
+	struct argon2_state a2 = ARGON2_INIT;
+	unsigned char buf[hlen], hex[(hlen * 2) + 1];
+	unsigned int i;
+
+	a2.password = password;
+	a2.passwordlen = strlen(password);
+	a2.salt = salt;
+	a2.saltlen = strlen(salt);
+	a2.m = m;
+	a2.i = t;
+	a2.p = p;
+	a2.t = hlen;
+	a2.type = type;
+	a2.version = 0x13;
+
+	return argon2(&a2, buf);
+}
+
+START_TEST(test_argon2_errors)
+{
+	int ret;
+
+	ret = argon2_hash("", "", 256, 1, 2, 32, ARGON2ID);
+	ck_assert_int_eq(ARGON2_SALT_TOO_SHORT, ret);
+
+	ret = argon2_hash("", "saltsalt", 8, 1, 2, 32, ARGON2ID);
+	ck_assert_int_eq(ARGON2_M_TOO_LITTLE, ret);
+
+	ret = argon2_hash("", "saltsalt", 256, 1, 13, 32, ARGON2ID);
+	ck_assert_int_eq(ARGON2_M_NOT_DIVISIBLE_BY_P, ret);
+
+	ret = argon2_hash("", "saltsalt", 256, 1, 2, 32, 11);
+	ck_assert_int_eq(ARGON2_BAD_TYPE, ret);
+}
+END_TEST
+
 void register_argon2_tests(struct TCase *test_case)
 {
 	tcase_add_test(test_case, test_argon2);
+	tcase_add_test(test_case, test_argon2_errors);
 }

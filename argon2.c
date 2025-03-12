@@ -444,12 +444,20 @@ static int validate_params(struct argon2_state *state)
 		return ARGON2_M_TOO_LITTLE;
 	}
 
+	if (state->m % state->p) {
+		return ARGON2_M_NOT_DIVISIBLE_BY_P;
+	}
+
 	if (state->i < 1) {
 		return ARGON2_ITER_TOO_LITTLE;
 	}
 
 	if (state->p < 1) {
 		return ARGON2_P_TOO_LITTLE;
+	}
+
+	if (state->saltlen < 8) {
+		return ARGON2_SALT_TOO_SHORT;
 	}
 
 	if (state->type != ARGON2D && state->type != ARGON2I && state->type != ARGON2ID) {
